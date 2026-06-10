@@ -1,5 +1,5 @@
 import { db } from "@/shared/db";
-import { projects } from "@/shared/db/schema";
+import { environments, projects } from "@/shared/db/schema";
 import { randomUUID } from "crypto";
 import { NextResponse } from "next/server";
 
@@ -17,15 +17,22 @@ export async function POST(request: Request) {
     );
   }
 
+  const projectId = randomUUID();
   const result = await db
     .insert(projects)
     .values({
-      id: randomUUID(),
+      id: projectId,
       name: body.name,
       slug: body.name.toLowerCase().replace(/\s+/g, "-"),
       ownerId: userId.toString(),
     })
     .returning();
+
+  await db.insert(environments).values([
+    { id: randomUUID(), name: "development", projectId },
+    { id: randomUUID(), name: "staging", projectId },
+    { id: randomUUID(), name: "production", projectId },
+  ]);
 
   return Response.json({ project: result[0] }, { status: 201 });
 }
