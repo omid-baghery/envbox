@@ -8,7 +8,6 @@ import { apiKeys } from "@/shared/db/schema";
 export async function GET(request: Request) {
   // ۱. گرفتن API Key از Header
   const authHeader = request.headers.get("Authorization");
-  console.log(authHeader);
 
   if (!authHeader?.startsWith("Bearer ")) {
     return Response.json({ error: "Missing API key" }, { status: 401 });
