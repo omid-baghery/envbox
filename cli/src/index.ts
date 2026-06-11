@@ -1,10 +1,34 @@
 #!/usr/bin/env node
 import { Command } from "commander";
-import { writeFileSync, existsSync, readFileSync } from "fs";
+import { writeFileSync, existsSync, readFileSync, appendFileSync } from "fs";
 import { resolve } from "path";
 
 const program = new Command();
-const CONFIG_FILE = ".envbox";
+const CONFIG_FILE = ".envboxrc";
+
+function addToGitignore() {
+  const gitignorePath = resolve(process.cwd(), ".gitignore");
+  const entry = CONFIG_FILE; // ".envboxrc"
+
+  if (!existsSync(gitignorePath)) {
+    // .gitignore وجود نداره — بسازش
+    writeFileSync(gitignorePath, `${entry}\n`);
+    console.log("📝 Created .gitignore and added .envboxrc");
+    return;
+  }
+
+  const content = readFileSync(gitignorePath, "utf-8");
+  const lines = content.split("\n");
+
+  if (lines.some((line) => line.trim() === entry)) {
+    // از قبل هست — هیچی نکن
+    return;
+  }
+
+  // اضافه کن
+  appendFileSync(gitignorePath, `\n${entry}\n`);
+  console.log("📝 Added .envboxrc to .gitignore");
+}
 
 // ═══════════════════════════════════════════
 // ذخیره و خوندن تنظیمات
@@ -82,6 +106,7 @@ program
   .option("--url <url>", "EnvBox API URL", "http://localhost:3000")
   .action((options) => {
     saveConfig({ apiKey: options.key, url: options.url });
+    addToGitignore();
     console.log("✅ Config saved. Now you can run:");
     console.log("   npx envbox pull --env staging");
     console.log("   npx envbox pull --env production");
@@ -95,7 +120,7 @@ program
     "--env <environment>",
     "Target environment (development, staging, production)",
   )
-  .option("--key <apiKey>", "API key (reads from .envbox if not provided)")
+  .option("--key <apiKey>", "API key (reads from .envboxrc if not provided)")
   .option("--url <url>", "EnvBox API URL")
   .action(async (options) => {
     const config = loadConfig();
