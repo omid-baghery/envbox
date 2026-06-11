@@ -95,7 +95,7 @@ program
     "--env <environment>",
     "Target environment (development, staging, production)",
   )
-  .option("--key <apiKey>", "API key (reads from .envboxrc if not provided)")
+  .option("--key <apiKey>", "API key (reads from .envbox if not provided)")
   .option("--url <url>", "EnvBox API URL")
   .action(async (options) => {
     const config = loadConfig();
@@ -115,5 +115,10 @@ program
 
 program.parse();
 
-// pnpm dev init --key envbox_sk_2ab9a7883f4ee4cfb716cc4e9dadf2992389560cc2c95d23287af425722010aa
-// pnpm dev pull --env staging
+// bash _next.js/envbox/cli :
+// $ pnpm dev init --key envbox_sk_2ab
+// $ pnpm dev pull --env staging/development/production
+
+// bash _next.js/envbox :
+// $ pnpm tsx cli/src/index.ts init --key envbox_sk_2ab
+// $ pnpm tsx cli/src/index.ts pull --env staging/development/production
