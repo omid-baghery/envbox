@@ -11,6 +11,8 @@ import {
   TabsTrigger,
 } from "@/shared/components/ui/tabs";
 import React from "react";
+import SignInTab from "./_components/sign-in-tab";
+import SignUpTab from "./_components/sign-up-tab";
 
 export default function LoginPage() {
   return (
@@ -25,7 +27,8 @@ export default function LoginPage() {
             <CardTitle className="text-2xl font-bold">Sign in</CardTitle>
           </CardHeader>
           <CardContent>
-            <p>signin</p>
+            {/* Sign In Tab */}
+            <SignInTab />
           </CardContent>
         </TabsContent>
 
@@ -34,7 +37,8 @@ export default function LoginPage() {
             <CardTitle className="text-2xl font-bold">Sign up</CardTitle>
           </CardHeader>
           <CardContent>
-            <p>signup</p>
+            {/* Sign up Tab */}
+            <SignUpTab />
           </CardContent>
         </TabsContent>
       </Card>
