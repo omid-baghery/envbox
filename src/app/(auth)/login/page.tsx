@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Card,
   CardContent,
@@ -10,11 +12,21 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/shared/components/ui/tabs";
-import React from "react";
+import React, { useEffect } from "react";
 import SignInTab from "./_components/sign-in-tab";
 import SignUpTab from "./_components/sign-up-tab";
+import { authClient } from "@/features/auth/auth-client";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
+  const router = useRouter();
+
+  useEffect(() => {
+    authClient.getSession().then((session) => {
+      if (session.data != null) router.push("/");
+    });
+  }, [router]);
+
   return (
     <Tabs defaultValue="signin" className="mx-auto w-full my-6 py-6 px-4">
       <TabsList>
