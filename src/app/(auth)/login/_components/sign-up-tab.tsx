@@ -15,16 +15,21 @@ import { Input } from "@/shared/components/ui/input";
 import { PasswordInput } from "@/shared/components/ui/password-input";
 import { Button } from "@/shared/components/ui/button";
 import { LoadingSwap } from "@/shared/components/ui/loading-swap";
+import { authClient } from "@/features/auth/auth-client";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 const signUpSchema = z.object({
   name: z.string().min(1, "Name is required"),
   email: z.string().email("Invalid email").min(1, "Email is required"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
 type SignUpForm = z.infer<typeof signUpSchema>;
 
 export default function SignUpTab() {
+  const router = useRouter();
+
   const form = useForm<SignUpForm>({
     resolver: zodResolver(signUpSchema),
     defaultValues: {
@@ -36,8 +41,18 @@ export default function SignUpTab() {
 
   const { isSubmitting } = form.formState;
 
-  const handleSignUp = (data: SignUpForm) => {
-    console.log(data);
+  const handleSignUp = async (data: SignUpForm) => {
+    await authClient.signUp.email(
+      { ...data, callbackURL: "/" },
+      {
+        onError: (error) => {
+          toast.error(error.error.message || "Failed to sign up");
+        },
+        onSuccess: () => {
+          router.push("/");
+        },
+      },
+    );
   };
 
   return (
