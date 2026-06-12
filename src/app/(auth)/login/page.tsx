@@ -12,7 +12,6 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/shared/components/ui/tabs";
-import React, { useEffect } from "react";
 import SignInTab from "./_components/sign-in-tab";
 import SignUpTab from "./_components/sign-up-tab";
 import { authClient } from "@/features/auth/auth-client";
@@ -20,42 +19,47 @@ import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { data: session, isPending } = authClient.useSession();
 
-  useEffect(() => {
-    authClient.getSession().then((session) => {
-      if (session.data != null) router.push("/");
-    });
-  }, [router]);
+  // Redirect if already logged in
+  if (!isPending && session) {
+    router.push("/");
+    return null;
+  }
+
+  // Don't flash the login form while checking session
+  if (isPending) return null;
 
   return (
-    <Tabs defaultValue="signin" className="mx-auto w-full my-6 py-6 px-4">
-      <TabsList>
-        <TabsTrigger value="signin">Sign In</TabsTrigger>
-        <TabsTrigger value="signup">Sign up</TabsTrigger>
-      </TabsList>
-      <TabsContent value="signin">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold">Sign in</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {/* Sign In Tab */}
-            <SignInTab />
-          </CardContent>
-        </Card>
-      </TabsContent>
+    <div className="flex min-h-screen items-center justify-center px-4">
+      <Tabs defaultValue="signin" className="w-full max-w-sm">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="signin">Sign In</TabsTrigger>
+          <TabsTrigger value="signup">Sign Up</TabsTrigger>
+        </TabsList>
 
-      <TabsContent value="signup">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold">Sign up</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {/* Sign up Tab */}
-            <SignUpTab />
-          </CardContent>
-        </Card>
-      </TabsContent>
-    </Tabs>
+        <TabsContent value="signin">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-2xl font-bold">Sign In</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <SignInTab />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="signup">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-2xl font-bold">Sign Up</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <SignUpTab />
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 }
