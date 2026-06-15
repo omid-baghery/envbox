@@ -1,21 +1,23 @@
 {
-  "name": "envbox",
+  "name": "envbox-cli",
   "version": "0.1.0",
   "description": "Pull environment variables from EnvBox",
   "main": "dist/index.js",
   "bin": {
     "envbox": "./dist/index.js"
   },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc",
-    "dev": "tsx src/index.ts"
+    "prepublishOnly": "pnpm build"
   },
   "dependencies": {
     "commander": "^12"
   },
   "devDependencies": {
     "@types/node": "^20",
-    "tsx": "^4",
     "typescript": "^5"
   }
 }
