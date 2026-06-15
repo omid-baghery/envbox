@@ -1,13 +1,33 @@
 import { db } from "@/shared/db";
 import { projects } from "@/shared/db/schema";
+import { auth } from "@/features/auth/auth";
+import { headers } from "next/headers";
+import { eq } from "drizzle-orm";
+import Link from "next/link";
+import { NewProjectDialog } from "./_components/new-project-dialog";
 
 export default async function DashboardPage() {
-  const projectList = await db.select().from(projects);
-  console.log(projectList.length);
+  // گرفتن کاربر لاگین‌شده
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session) {
+    return <div>Please sign in</div>;
+  }
+
+  // فقط پروژه‌های این کاربر
+  const projectList = await db
+    .select()
+    .from(projects)
+    .where(eq(projects.ownerId, session.user.id));
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-6">
-      <h1 className="text-base font-medium">Projects ({projectList.length})</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-base font-medium">Projects</h1>
+        <NewProjectDialog />
+      </div>
 
       <div className="flex flex-col gap-2">
         {projectList.map((project) => (
@@ -21,6 +41,7 @@ export default async function DashboardPage() {
                 {project.slug} · Created {project.createdAt?.toDateString()}
               </p>
             </div>
+            <span className="text-xs text-muted-foreground">→</span>
           </div>
         ))}
       </div>
