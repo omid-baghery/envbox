@@ -3,7 +3,6 @@ import { projects } from "@/shared/db/schema";
 import { auth } from "@/features/auth/auth";
 import { headers } from "next/headers";
 import { eq } from "drizzle-orm";
-import Link from "next/link";
 import { NewProjectDialog } from "./_components/new-project-dialog";
 
 export default async function DashboardPage() {
@@ -24,12 +23,11 @@ export default async function DashboardPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-6">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-base font-medium">Projects</h1>
-        <NewProjectDialog />
-      </div>
-
       <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-base font-medium">Projects</h1>
+          <NewProjectDialog />
+        </div>
         {projectList.map((project) => (
           <div
             key={project.id}
