@@ -6,6 +6,8 @@ import { environments } from "@/shared/db/schema/environments";
 import { auth } from "@/features/auth/auth";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
+import { generateApiKey } from "../api-keys/api-keys.service";
+import { apiKeys } from "@/shared/db/schema";
 
 export async function createProject(formData: FormData) {
   // ۱. چک کن کاربر لاگین هست
@@ -42,6 +44,13 @@ export async function createProject(formData: FormData) {
     { id: crypto.randomUUID(), name: "staging", projectId },
     { id: crypto.randomUUID(), name: "production", projectId },
   ]);
+
+  const key = generateApiKey();
+  await db.insert(apiKeys).values({
+    id: crypto.randomUUID(),
+    key,
+    projectId,
+  });
 
   // ۶. کش رو رفرش کن
   revalidatePath("/dashboard");
