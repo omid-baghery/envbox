@@ -5,25 +5,25 @@ import { randomUUID } from "crypto";
 import { eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(req: NextRequest) {
-  const body = await req.json();
-  // body: { key: "DATABASE_URL", value: "postgres://...", environmentId: "..." }
+// export async function POST(req: NextRequest) {
+//   const body = await req.json();
+//   // body: { key: "DATABASE_URL", value: "postgres://...", environmentId: "..." }
 
-  const encryptedValue = encrypt(body.value);
+//   const encryptedValue = encrypt(body.value);
 
-  const result = await db
-    .insert(variables)
-    .values({
-      id: randomUUID(),
-      key: body.key,
-      encryptedValue,
-      environmentId: body.environmentId,
-      projectId: body.projectId,
-    })
-    .returning();
+//   const result = await db
+//     .insert(variables)
+//     .values({
+//       id: randomUUID(),
+//       key: body.key,
+//       encryptedValue,
+//       environmentId: body.environmentId,
+//       projectId: body.projectId,
+//     })
+//     .returning();
 
-  return NextResponse.json({ variables: result[0] }, { status: 201 });
-}
+//   return NextResponse.json({ variables: result[0] }, { status: 201 });
+// }
 
 export async function GET(req: NextRequest) {
   // GET http://localhost:3000/api/variables?environmentId=5fe63381-8b56-4693-a5fb-bc93b1efb213

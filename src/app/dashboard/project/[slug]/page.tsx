@@ -6,6 +6,7 @@ import { auth } from "@/features/auth/auth";
 import { headers } from "next/headers";
 import { eq, and } from "drizzle-orm";
 import { notFound } from "next/navigation";
+import { AddVariableDialog } from "./add-variable-dialog";
 
 export default async function ProjectPage({
   params,
@@ -41,6 +42,14 @@ export default async function ProjectPage({
   return (
     <div className="mx-auto max-w-3xl px-6 py-6">
       <h1 className="text-base font-medium mb-6">{project[0].name}</h1>
+
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-base font-medium">{project[0].name}</h1>
+        <AddVariableDialog
+          environments={envs.map((e) => ({ id: e.id, name: e.name }))}
+          projectId={project[0].id}
+        />
+      </div>
 
       <div className="flex gap-2 mb-4">
         {envs.map((env) => {
