@@ -6,7 +6,9 @@ import { auth } from "@/features/auth/auth";
 import { headers } from "next/headers";
 import { eq, and } from "drizzle-orm";
 import { notFound } from "next/navigation";
-import { AddVariableDialog } from "./add-variable-dialog";
+import { AddVariableDialog } from "./_components/add-variable-dialog";
+import { apiKeys } from "@/shared/db/schema";
+import { ApiKeyCard } from "./_components/api-key-card";
 
 export default async function ProjectPage({
   params,
@@ -23,6 +25,12 @@ export default async function ProjectPage({
     .select()
     .from(projects)
     .where(and(eq(projects.slug, slug), eq(projects.ownerId, session.user.id)))
+    .limit(1);
+
+  const apiKey = await db
+    .select()
+    .from(apiKeys)
+    .where(eq(apiKeys.projectId, project[0].id))
     .limit(1);
 
   if (project.length === 0) notFound();
@@ -92,6 +100,12 @@ export default async function ProjectPage({
               ))}
             </tbody>
           </table>
+
+          {apiKey.length > 0 && (
+            <div className="mb-6">
+              <ApiKeyCard apiKey={apiKey[0].key} />
+            </div>
+          )}
         </div>
       )}
     </div>
