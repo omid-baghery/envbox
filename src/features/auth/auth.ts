@@ -18,6 +18,7 @@ export const auth = betterAuth({
       maxAge: 60, // 1 minute
     },
   },
+  baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000", // ← اضافه کن
   plugins: [nextCookies()],
   secret: process.env.BETTER_AUTH_SECRET!,
 });
