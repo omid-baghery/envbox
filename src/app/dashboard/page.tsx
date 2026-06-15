@@ -4,6 +4,7 @@ import { auth } from "@/features/auth/auth";
 import { headers } from "next/headers";
 import { eq } from "drizzle-orm";
 import { NewProjectDialog } from "./_components/new-project-dialog";
+import Link from "next/link";
 
 export default async function DashboardPage() {
   // گرفتن کاربر لاگین‌شده
@@ -29,7 +30,8 @@ export default async function DashboardPage() {
           <NewProjectDialog />
         </div>
         {projectList.map((project) => (
-          <div
+          <Link
+            href={`/dashboard/project/${project.slug}`}
             key={project.id}
             className="flex items-center justify-between rounded-lg border px-4 py-3"
           >
@@ -40,7 +42,7 @@ export default async function DashboardPage() {
               </p>
             </div>
             <span className="text-xs text-muted-foreground">→</span>
-          </div>
+          </Link>
         ))}
       </div>
     </div>
