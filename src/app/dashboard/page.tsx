@@ -31,7 +31,7 @@ export default async function DashboardPage() {
         </div>
         {projectList.map((project) => (
           <Link
-            href={`/dashboard/project/${project.slug}`}
+            href={`/dashboard/projects/${project.slug}`}
             key={project.id}
             className="flex items-center justify-between rounded-lg border px-4 py-3"
           >
