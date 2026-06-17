@@ -1,67 +1,104 @@
 import { db } from "@/shared/db";
-import { variables } from "@/shared/db/schema/variables";
-import { environments } from "@/shared/db/schema/environments";
+import {
+  variables,
+  environments,
+  apiKeys,
+  projectMembers,
+} from "@/shared/db/schema";
 import { decrypt } from "@/shared/lib/encryption";
-import { eq, and } from "drizzle-orm";
-import { apiKeys } from "@/shared/db/schema";
+import { hashSecret } from "@/shared/lib/token-hash";
+import { eq, and, isNull } from "drizzle-orm";
 
 export async function GET(request: Request) {
   // ۱. گرفتن API Key از Header
   const authHeader = request.headers.get("Authorization");
-
   if (!authHeader?.startsWith("Bearer ")) {
     return Response.json({ error: "Missing API key" }, { status: 401 });
   }
-  const apiKey = authHeader.replace("Bearer ", "");
+  const rawKey = authHeader.replace("Bearer ", "");
+  const keyHash = hashSecret(rawKey);
 
   // ۲. گرفتن environment از query string
   const { searchParams } = new URL(request.url);
-  const envName = searchParams.get("env"); // "development" | "staging" | "production"
-
+  const envName = searchParams.get("env"); // "dev" | "staging" | "prod"
   if (!envName) {
     return Response.json({ error: "env is required" }, { status: 400 });
   }
 
-  // ۳. پیدا کردن API Key تو دیتابیس
-  const keyResult = await db
+  // ۳. پیدا کردن کلید با hash (نه plaintext) و چک revoke
+  const [keyRow] = await db
     .select()
     .from(apiKeys)
-    .where(eq(apiKeys.key, apiKey))
+    .where(and(eq(apiKeys.keyHash, keyHash), isNull(apiKeys.revokedAt)))
     .limit(1);
 
-  if (keyResult.length === 0) {
-    return Response.json({ error: "Invalid API key" }, { status: 401 });
+  if (!keyRow) {
+    return Response.json(
+      { error: "Invalid or revoked API key" },
+      { status: 401 },
+    );
   }
 
-  const projectId = keyResult[0].projectId;
+  // ۴. خود عضو را می‌خوانیم تا لیست environment های مجازش را بدانیم
+  const [member] = await db
+    .select()
+    .from(projectMembers)
+    .where(eq(projectMembers.id, keyRow.memberId))
+    .limit(1);
 
-  // ۴. پیدا کردن environment
-  const envResult = await db
+  if (!member || member.status === "removed") {
+    return Response.json({ error: "Member access revoked" }, { status: 401 });
+  }
+
+  // ۵. پیدا کردن environment با اسم + پروژه‌ی همین کلید
+  const [env] = await db
     .select()
     .from(environments)
     .where(
       and(
-        eq(environments.projectId, projectId),
+        eq(environments.projectId, keyRow.projectId),
         eq(environments.name, envName),
       ),
     )
     .limit(1);
 
-  if (envResult.length === 0) {
+  if (!env) {
     return Response.json({ error: "Environment not found" }, { status: 404 });
   }
 
-  // ۵. گرفتن متغیرها و رمزگشایی
+  // ۶. مهم‌ترین چک: آیا این عضو واقعاً اجازه‌ی این environment خاص را دارد؟
+  // قبلاً این کنترل اصلاً وجود نداشت — هر کلید معتبر هر environment ای را
+  // که اسمش را می‌دانست می‌توانست بخواند.
+  if (!member.environmentIds.includes(env.id)) {
+    return Response.json(
+      { error: `You don't have access to the "${envName}" environment` },
+      { status: 403 },
+    );
+  }
+
+  // ۷. گرفتن متغیرها و رمزگشایی
   const vars = await db
     .select()
     .from(variables)
-    .where(eq(variables.environmentId, envResult[0].id));
+    .where(eq(variables.environmentId, env.id));
 
-  // ۶. تبدیل به فرمت KEY=VALUE
   const result: Record<string, string> = {};
   for (const v of vars) {
     result[v.key] = decrypt(v.encryptedValue);
   }
+
+  // ۸. آپدیت lastUsedAt (کلید) و lastPullAt (عضو) — برای نمایش در تب Members/API keys
+  const now = new Date();
+  await Promise.all([
+    db
+      .update(apiKeys)
+      .set({ lastUsedAt: now })
+      .where(eq(apiKeys.id, keyRow.id)),
+    db
+      .update(projectMembers)
+      .set({ lastPullAt: now })
+      .where(eq(projectMembers.id, member.id)),
+  ]);
 
   return Response.json(result);
 }
