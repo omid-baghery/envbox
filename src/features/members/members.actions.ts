@@ -5,6 +5,8 @@ import { requireProjectOwner } from "../projects/authorization";
 import { environments, inviteTokens, projectMembers } from "@/shared/db/schema";
 import { and, eq, inArray } from "drizzle-orm";
 import { randomUUID } from "crypto";
+import { generateSecret, hashSecret } from "@/shared/lib/token-hash";
+import { revalidatePath } from "next/cache";
 
 const EXPIRY_MS: Record<string, number> = {
   "1h": 60 * 60 * 1000,
@@ -24,7 +26,7 @@ export async function inviteMember(input: {
     throw new Error("Select at least one environment");
   }
 
-  // چک کردن معتبر بودن ولیدیشن ها
+  // ============== چک کردن معتبر بودن ولیدیشن ها
   const validEnvs = await db
     .select({ id: environments.id })
     .from(environments)
@@ -52,16 +54,18 @@ export async function inviteMember(input: {
   });
 
   // ============= create token
-  const rawToken = "placeholder-token";
-  const tokenHash = "placeholder-hash";
+  const rawToken = generateSecret("evb_invite", 16);
+  const tokenHash = hashSecret(rawToken);
 
   await db.insert(inviteTokens).values({
     id: randomUUID(),
     projectId: input.projectId,
     memberId,
     tokenHash,
-    expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // ۲۴ ساعت
+    expiresAt: new Date(Date.now() + EXPIRY_MS[input.expiry]),
   });
 
-  return { command: `npx envbox join ${rawToken}` };
+  revalidatePath("/dashboard/projects");
+
+  return { command: `npx envbox-cli join ${rawToken}` };
 }
