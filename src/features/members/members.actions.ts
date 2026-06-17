@@ -126,3 +126,36 @@ export async function joinWithToken(rawToken: string) {
     return { apiKey: rawApiKey };
   });
 }
+
+export async function removeMember(projectId: string, memberId: string) {
+  // ۱. فقط owner
+  const { membership: actingMember } = await requireProjectOwner(projectId);
+
+  // ۲. owner نمی‌تونه خودش رو حذف کنه
+  if (actingMember.id === memberId) {
+    throw new Error("You can't remove yourself as the owner");
+  }
+
+  // ۳. تراکنش
+  await db.transaction(async (tx) => {
+    // همه کلیدهای فعال این عضو رو revoke کن
+    await tx
+      .update(apiKeys)
+      .set({ revokedAt: new Date() })
+      .where(and(eq(apiKeys.memberId, memberId), isNull(apiKeys.revokedAt)));
+
+    // عضو رو به removed تغییر بده
+    await tx
+      .update(projectMembers)
+      .set({ status: "removed", updatedAt: new Date() })
+      .where(
+        and(
+          eq(projectMembers.id, memberId),
+          eq(projectMembers.projectId, projectId),
+        ),
+      );
+  });
+
+  revalidatePath(`/dashboard/projects`);
+  return { success: true };
+}
