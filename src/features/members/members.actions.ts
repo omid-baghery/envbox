@@ -2,10 +2,19 @@
 
 import { db } from "@/shared/db";
 import { requireProjectOwner } from "../projects/authorization";
-import { environments, inviteTokens, projectMembers } from "@/shared/db/schema";
-import { and, eq, inArray } from "drizzle-orm";
+import {
+  apiKeys,
+  environments,
+  inviteTokens,
+  projectMembers,
+} from "@/shared/db/schema";
+import { and, eq, gt, inArray, isNull } from "drizzle-orm";
 import { randomUUID } from "crypto";
-import { generateSecret, hashSecret } from "@/shared/lib/token-hash";
+import {
+  generateSecret,
+  hashSecret,
+  previewSecret,
+} from "@/shared/lib/token-hash";
 import { revalidatePath } from "next/cache";
 
 const EXPIRY_MS: Record<string, number> = {
@@ -68,4 +77,52 @@ export async function inviteMember(input: {
   revalidatePath("/dashboard/projects");
 
   return { command: `npx envbox-cli join ${rawToken}` };
+}
+
+export async function joinWithToken(rawToken: string) {
+  const tokenHash = hashSecret(rawToken);
+  const now = new Date();
+
+  const [invite] = await db
+    .select()
+    .from(inviteTokens)
+    .where(
+      and(
+        eq(inviteTokens.tokenHash, tokenHash),
+        isNull(inviteTokens.usedAt),
+        gt(inviteTokens.expiresAt, now),
+      ),
+    )
+    .limit(1);
+
+  if (!invite) {
+    throw new Error("This invite link is invalid or has expired");
+  }
+
+  // ============ علامت گذاری توکن به عنوان استفاده شده با عمل همه یا هیچ
+  return await db.transaction(async (tx) => {
+    await tx
+      .update(inviteTokens)
+      .set({ usedAt: now })
+      .where(eq(inviteTokens.id, invite.id));
+
+    const rawApiKey = generateSecret("evb_sk", 24);
+    const keyHash = hashSecret(rawApiKey);
+
+    await tx.insert(apiKeys).values({
+      id: randomUUID(),
+      projectId: invite.projectId,
+      memberId: invite.memberId,
+      keyHash,
+      keyPreview: previewSecret(rawApiKey),
+    });
+
+    // =========== فعال کردن عضو
+    await tx
+      .update(projectMembers)
+      .set({ status: "active", updatedAt: now })
+      .where(eq(projectMembers.id, invite.memberId));
+
+    return { apiKey: rawApiKey };
+  });
 }
