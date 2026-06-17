@@ -6,7 +6,7 @@ import { requireSession } from "./authorization";
 import { revalidatePath } from "next/cache";
 import { randomUUID } from "crypto";
 import { and, eq } from "drizzle-orm";
-import { generateUniqueSlug } from "./slug";
+import { generateUniqueSlug } from "../../shared/lib/slug";
 
 const ENV_NAMES = ["dev", "staging", "prod"] as const;
 
