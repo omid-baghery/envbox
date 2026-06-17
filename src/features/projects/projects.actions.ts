@@ -1,59 +1,99 @@
 "use server";
 
 import { db } from "@/shared/db";
-import { projects } from "@/shared/db/schema/projects";
-import { environments } from "@/shared/db/schema/environments";
-import { auth } from "@/features/auth/auth";
-import { headers } from "next/headers";
+import { projects, environments, projectMembers } from "@/shared/db/schema";
+import { requireSession } from "./authorization";
 import { revalidatePath } from "next/cache";
-import { generateApiKey } from "../api-keys/api-keys.service";
-import { apiKeys } from "@/shared/db/schema";
+import { randomUUID } from "crypto";
+import { and, eq } from "drizzle-orm";
+import { generateUniqueSlug } from "./slug";
+
+const ENV_NAMES = ["dev", "staging", "prod"] as const;
 
 export async function createProject(formData: FormData) {
-  // ۱. چک کن کاربر لاگین هست
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  const session = await requireSession();
 
-  if (!session) {
-    throw new Error("Unauthorized");
-  }
-
-  // ۲. اسم رو از فرم بگیر
-  const name = formData.get("name") as string;
-
+  const name = (formData.get("name") as string)?.trim();
   if (!name || name.length < 2) {
     throw new Error("Project name must be at least 2 characters");
   }
 
-  // ۳. slug بساز
-  const slug = name.toLowerCase().replace(/\s+/g, "-");
-  const projectId = crypto.randomUUID();
+  const slug = await generateUniqueSlug(name);
+  const projectId = randomUUID();
+  const environmentIds: string[] = [];
 
-  // ۴. پروژه رو تو دیتابیس بذار
-  await db.insert(projects).values({
-    id: projectId,
-    name,
-    slug,
-    ownerId: session.user.id,
+  // یک تراکنش: یا همه‌چیز ساخته می‌شود یا هیچ‌چیز — اگر وسط کار خطا بیاید
+  // (مثلاً slug تکراری)، یک پروژه‌ی نصفه‌کاره بدون owner در project_members نمی‌ماند.
+  await db.transaction(async (tx) => {
+    await tx.insert(projects).values({
+      id: projectId,
+      name,
+      slug,
+      ownerId: session.user.id,
+    });
+
+    const envRows = ENV_NAMES.map((envName) => ({
+      id: randomUUID(),
+      name: envName,
+      projectId,
+    }));
+    envRows.forEach((e) => environmentIds.push(e.id));
+    await tx.insert(environments).values(envRows);
+
+    // owner هم یک ردیف در project_members دارد، با دسترسی به همه‌ی environment ها.
+    await tx.insert(projectMembers).values({
+      id: randomUUID(),
+      projectId,
+      userId: session.user.id,
+      role: "owner",
+      environmentIds,
+      status: "active",
+    });
   });
 
-  // ۵. سه محیط پیش‌فرض بساز
-  await db.insert(environments).values([
-    { id: crypto.randomUUID(), name: "development", projectId },
-    { id: crypto.randomUUID(), name: "staging", projectId },
-    { id: crypto.randomUUID(), name: "production", projectId },
-  ]);
-
-  const key = generateApiKey();
-  await db.insert(apiKeys).values({
-    id: crypto.randomUUID(),
-    key,
-    projectId,
-  });
-
-  // ۶. کش رو رفرش کن
   revalidatePath("/dashboard");
+  return { success: true, slug, projectId };
+}
 
-  return { success: true, slug };
+export async function renameProject(projectId: string, name: string) {
+  const session = await requireSession();
+  const trimmed = name.trim();
+  if (!trimmed || trimmed.length < 2) {
+    throw new Error("Project name must be at least 2 characters");
+  }
+
+  const [updated] = await db
+    .update(projects)
+    .set({ name: trimmed, updatedAt: new Date() })
+    .where(
+      and(eq(projects.id, projectId), eq(projects.ownerId, session.user.id)),
+    )
+    .returning();
+
+  if (!updated) {
+    throw new Error("Project not found or you are not the owner");
+  }
+
+  revalidatePath(`/dashboard/projects/${updated.slug}`);
+  return { success: true };
+}
+
+export async function deleteProject(projectId: string) {
+  const session = await requireSession();
+
+  const [deleted] = await db
+    .delete(projects)
+    .where(
+      and(eq(projects.id, projectId), eq(projects.ownerId, session.user.id)),
+    )
+    .returning();
+
+  if (!deleted) {
+    throw new Error("Project not found or you are not the owner");
+  }
+
+  // environments, project_members, invite_tokens, variables, api_keys
+  // همه با onDelete: "cascade" در schema خودکار پاک می‌شوند.
+  revalidatePath("/dashboard");
+  return { success: true };
 }
