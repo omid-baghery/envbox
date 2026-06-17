@@ -159,3 +159,28 @@ export async function removeMember(projectId: string, memberId: string) {
   revalidatePath(`/dashboard/projects`);
   return { success: true };
 }
+
+export async function revokeApiKey(projectId: string, apiKeyId: string) {
+  // ۱. فقط owner
+  await requireProjectOwner(projectId);
+
+  // ۲. کلید رو revoke کن
+  const [revoked] = await db
+    .update(apiKeys)
+    .set({ revokedAt: new Date() })
+    .where(
+      and(
+        eq(apiKeys.id, apiKeyId),
+        eq(apiKeys.projectId, projectId),
+        isNull(apiKeys.revokedAt),
+      ),
+    )
+    .returning();
+
+  if (!revoked) {
+    throw new Error("API key not found or already revoked");
+  }
+
+  revalidatePath(`/dashboard/projects`);
+  return { success: true };
+}
