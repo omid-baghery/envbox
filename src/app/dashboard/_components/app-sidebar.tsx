@@ -17,12 +17,14 @@ export function AppSidebar() {
   return (
     <aside className="flex w-48 flex-shrink-0 flex-col border-r border-border bg-background">
       {/* لوگو */}
-      <div className="flex h-11 items-center gap-2 border-b border-border px-4">
-        <div className="flex h-5 w-5 items-center justify-center rounded bg-foreground">
-          <span className="text-[10px] font-semibold text-background">E</span>
+      <Link href={"/"}>
+        <div className="flex h-11 items-center gap-2 border-b border-border px-4">
+          <div className="flex h-5 w-5 items-center justify-center rounded bg-foreground">
+            <span className="text-[10px] font-semibold text-background">E</span>
+          </div>
+          <span className="text-sm font-medium">EnvBox</span>
         </div>
-        <span className="text-sm font-medium">EnvBox</span>
-      </div>
+      </Link>
 
       {/* لینک‌ها */}
       <nav className="flex flex-1 flex-col gap-0.5 px-2 py-3">
