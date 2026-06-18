@@ -14,6 +14,8 @@ import {
   TabsTrigger,
 } from "@/shared/components/ui/tabs";
 import { AddVariableDialog } from "./_components/add-variable-dialog";
+import { Button } from "@/shared/components/ui/button";
+import { InviteMemberDialog } from "./_components/invite-member-dialog";
 
 export default async function ProjectPage({
   params,
@@ -131,7 +133,62 @@ export default async function ProjectPage({
 
         {/* تب Members */}
         <TabsContent value="members">
-          <p className="text-sm text-muted-foreground">Members coming soon.</p>
+          <TabsContent value="members">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-sm font-medium">
+                Members ({members.length})
+              </h2>
+              <InviteMemberDialog
+                environments={envs.map((e) => ({ id: e.id, name: e.name }))}
+                projectId={project.id}
+              />
+            </div>
+
+            {members.length === 0 ? (
+              <div className="rounded-lg border border-dashed py-12 text-center">
+                <p className="text-sm text-muted-foreground">No members yet.</p>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-2">
+                {members.map((member) => (
+                  <div
+                    key={member.id}
+                    className="flex items-center justify-between rounded-lg border px-4 py-3"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs font-medium">
+                        {member.inviteEmail?.charAt(0)?.toUpperCase() ||
+                          member.role?.charAt(0)?.toUpperCase() ||
+                          "?"}
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">
+                          {member.inviteEmail || member.userId || "Unknown"}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {member.role} · {member.status}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground">
+                        {member.environmentIds?.length || 0} envs
+                      </span>
+                      {member.role !== "owner" && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-red-500 text-xs"
+                        >
+                          Remove
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </TabsContent>
         </TabsContent>
 
         {/* تب API Keys */}
