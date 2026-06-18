@@ -2,13 +2,18 @@ import { db } from "@/shared/db";
 import { projects } from "@/shared/db/schema/projects";
 import { environments } from "@/shared/db/schema/environments";
 import { variables } from "@/shared/db/schema/variables";
+import { projectMembers, apiKeys } from "@/shared/db/schema";
 import { auth } from "@/features/auth/auth";
 import { headers } from "next/headers";
 import { eq, and } from "drizzle-orm";
 import { notFound } from "next/navigation";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/shared/components/ui/tabs";
 import { AddVariableDialog } from "./_components/add-variable-dialog";
-import { apiKeys } from "@/shared/db/schema";
-import { ApiKeyCard } from "./_components/api-key-card";
 
 export default async function ProjectPage({
   params,
@@ -20,94 +25,120 @@ export default async function ProjectPage({
 
   if (!session) return <div>Please sign in</div>;
 
-  // پیدا کردن پروژه
-  const project = await db
+  // پروژه
+  const [project] = await db
     .select()
     .from(projects)
     .where(and(eq(projects.slug, slug), eq(projects.ownerId, session.user.id)))
     .limit(1);
 
-  const apiKey = await db
-    .select()
-    .from(apiKeys)
-    .where(eq(apiKeys.projectId, project[0].id))
-    .limit(1);
+  if (!project) notFound();
 
-  if (project.length === 0) notFound();
-
-  // گرفتن environment ها
+  // محیط‌ها
   const envs = await db
     .select()
     .from(environments)
-    .where(eq(environments.projectId, project[0].id));
+    .where(eq(environments.projectId, project.id));
 
-  // گرفتن همه متغیرهای پروژه
+  // متغیرها
   const allVars = await db
     .select()
     .from(variables)
-    .where(eq(variables.projectId, project[0].id));
+    .where(eq(variables.projectId, project.id));
+
+  // اعضا
+  const members = await db
+    .select()
+    .from(projectMembers)
+    .where(eq(projectMembers.projectId, project.id));
+
+  // کلیدها
+  const keys = await db
+    .select()
+    .from(apiKeys)
+    .where(eq(apiKeys.projectId, project.id));
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-6">
-      <h1 className="text-base font-medium mb-6">{project[0].name}</h1>
+      <h1 className="text-base font-medium mb-6">{project.name}</h1>
 
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-base font-medium">{project[0].name}</h1>
-        <AddVariableDialog
-          environments={envs.map((e) => ({ id: e.id, name: e.name }))}
-          projectId={project[0].id}
-        />
-      </div>
+      <Tabs defaultValue="variables">
+        <TabsList>
+          <TabsTrigger value="variables">Variables</TabsTrigger>
+          <TabsTrigger value="members">Members</TabsTrigger>
+          <TabsTrigger value="api-keys">API Keys</TabsTrigger>
+        </TabsList>
 
-      <div className="flex gap-2 mb-4">
-        {envs.map((env) => {
-          const count = allVars.filter(
-            (v) => v.environmentId === env.id,
-          ).length;
-          return (
-            <div key={env.id} className="rounded-md border px-3 py-1.5 text-sm">
-              {env.name} ({count})
+        {/* تب Variables */}
+        <TabsContent value="variables">
+          <TabsContent value="variables">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex gap-2">
+                {envs.map((env) => {
+                  const count = allVars.filter(
+                    (v) => v.environmentId === env.id,
+                  ).length;
+                  return (
+                    <div
+                      key={env.id}
+                      className="rounded-md border px-3 py-1.5 text-sm"
+                    >
+                      {env.name} ({count})
+                    </div>
+                  );
+                })}
+              </div>
+              <AddVariableDialog
+                environments={envs.map((e) => ({ id: e.id, name: e.name }))}
+                projectId={project.id}
+              />
             </div>
-          );
-        })}
-      </div>
 
-      {allVars.length === 0 ? (
-        <div className="rounded-lg border border-dashed py-12 text-center">
-          <p className="text-sm text-muted-foreground">No variables yet.</p>
-        </div>
-      ) : (
-        <div className="rounded-lg border">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b">
-                <th className="text-left px-4 py-2 text-xs text-muted-foreground uppercase">
-                  Key
-                </th>
-                <th className="text-left px-4 py-2 text-xs text-muted-foreground uppercase">
-                  Value
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {allVars.map((v) => (
-                <tr key={v.id} className="border-b last:border-0">
-                  <td className="px-4 py-2 font-mono text-xs">{v.key}</td>
-                  <td className="px-4 py-2 font-mono text-xs text-muted-foreground">
-                    ••••••••••
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+            {allVars.length === 0 ? (
+              <div className="rounded-lg border border-dashed py-12 text-center">
+                <p className="text-sm text-muted-foreground">
+                  No variables yet.
+                </p>
+              </div>
+            ) : (
+              <div className="rounded-lg border">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left px-4 py-2 text-xs text-muted-foreground uppercase">
+                        Key
+                      </th>
+                      <th className="text-left px-4 py-2 text-xs text-muted-foreground uppercase">
+                        Value
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {allVars.map((v) => (
+                      <tr key={v.id} className="border-b last:border-0">
+                        <td className="px-4 py-2 font-mono text-xs">{v.key}</td>
+                        <td className="px-4 py-2 font-mono text-xs text-muted-foreground">
+                          ••••••••••
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </TabsContent>
+        </TabsContent>
 
-          {apiKey.length > 0 && (
-            <div className="mb-6">
-              <ApiKeyCard apiKey={apiKey[0].key} />
-            </div>
-          )}
-        </div>
-      )}
+        {/* تب Members */}
+        <TabsContent value="members">
+          <p className="text-sm text-muted-foreground">Members coming soon.</p>
+        </TabsContent>
+
+        {/* تب API Keys */}
+        <TabsContent value="api-keys">
+          <p className="text-sm text-muted-foreground">API Keys coming soon.</p>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
