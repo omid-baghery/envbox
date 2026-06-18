@@ -1,3 +1,5 @@
+"use server";
+
 import { db } from "@/shared/db";
 import { environments, projects, variables } from "@/shared/db/schema";
 import { and, eq } from "drizzle-orm";
