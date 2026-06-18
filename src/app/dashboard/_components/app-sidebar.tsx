@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutGrid, LogOut } from "lucide-react";
+import { HomeIcon, LayoutGrid, LogOut } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { authClient } from "@/features/auth/auth-client";
 import { useRouter } from "next/navigation";
@@ -31,6 +31,20 @@ export function AppSidebar() {
           className={cn(
             "flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors",
             isActive("/dashboard") && pathname === "/dashboard"
+              ? "bg-accent text-foreground font-medium"
+              : "text-muted-foreground hover:bg-accent hover:text-foreground",
+          )}
+        >
+          <HomeIcon size={15} />
+          Overview
+        </Link>
+
+        <Link
+          href="/dashboard/projects"
+          className={cn(
+            "flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors",
+            isActive("/dashboard/projects") &&
+              pathname === "/dashboard/projects"
               ? "bg-accent text-foreground font-medium"
               : "text-muted-foreground hover:bg-accent hover:text-foreground",
           )}
