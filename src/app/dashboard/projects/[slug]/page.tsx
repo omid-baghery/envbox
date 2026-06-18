@@ -193,7 +193,46 @@ export default async function ProjectPage({
 
         {/* تب API Keys */}
         <TabsContent value="api-keys">
-          <p className="text-sm text-muted-foreground">API Keys coming soon.</p>
+          <TabsContent value="api-keys">
+            <h2 className="text-sm font-medium mb-4">
+              API Keys ({keys.length})
+            </h2>
+
+            {keys.length === 0 ? (
+              <div className="rounded-lg border border-dashed py-12 text-center">
+                <p className="text-sm text-muted-foreground">
+                  No API keys yet.
+                </p>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-2">
+                {keys.map((key) => (
+                  <div
+                    key={key.id}
+                    className="flex items-center justify-between rounded-lg border px-4 py-3"
+                  >
+                    <div>
+                      <p className="text-xs font-mono text-muted-foreground">
+                        {key.keyPreview || key.keyHash.slice(0, 16) + "..."}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Created {key.createdAt?.toDateString()}
+                        {key.lastUsedAt &&
+                          ` · Last used ${key.lastUsedAt.toDateString()}`}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {key.revokedAt ? (
+                        <span className="text-xs text-red-500">Revoked</span>
+                      ) : (
+                        <span className="text-xs text-green-600">Active</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </TabsContent>
         </TabsContent>
       </Tabs>
     </div>
