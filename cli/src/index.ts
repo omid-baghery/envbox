@@ -116,7 +116,7 @@ program
   .command("join")
   .description("Join a project using a one-time invite token")
   .argument("<token>", "Invite token from your project admin")
-  .option("--url <url>", "EnvBox API URL", "http://localhost:3000")
+  .option("--url <url>", "EnvBox API URL", "https://envbox.vercel.app")
   .action(async (token, options) => {
     const url = options.url;
     console.log("🔗 Joining project...");
@@ -159,7 +159,7 @@ program
   .command("init")
   .description("Save an existing API key on this machine (no invite needed)")
   .requiredOption("--key <apiKey>", "API key from EnvBox dashboard")
-  .option("--url <url>", "EnvBox API URL", "http://localhost:3000")
+  .option("--url <url>", "EnvBox API URL", "https://envbox.vercel.app")
   .action((options) => {
     saveConfig({ apiKey: options.key, url: options.url });
     addToGitignore();
@@ -183,7 +183,7 @@ program
 
     // اولویت: flag > config > default
     const key = options.key || config?.apiKey;
-    const url = options.url || config?.url || "http://localhost:3000";
+    const url = options.url || config?.url || "https://envbox.vercel.app";
 
     if (!key) {
       console.error("❌ No API key found.");

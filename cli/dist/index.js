@@ -6,6 +6,7 @@ const fs_1 = require("fs");
 const path_1 = require("path");
 const program = new commander_1.Command();
 const CONFIG_FILE = ".envboxrc";
+const VALID_ENVS = ["dev", "staging", "prod"];
 function addToGitignore() {
     const gitignorePath = (0, path_1.resolve)(process.cwd(), ".gitignore");
     const entry = CONFIG_FILE; // ".envboxrc"
@@ -37,6 +38,12 @@ function loadConfig() {
     if (!(0, fs_1.existsSync)(configPath))
         return null;
     return JSON.parse((0, fs_1.readFileSync)(configPath, "utf-8"));
+}
+function validateEnv(env) {
+    if (!VALID_ENVS.includes(env)) {
+        console.error(`❌ Invalid environment "${env}". Must be one of: ${VALID_ENVS.join(", ")}`);
+        process.exit(1);
+    }
 }
 // ═══════════════════════════════════════════
 // منطق Pull (یه تابع مشترک)
@@ -81,42 +88,79 @@ program
     .name("envbox")
     .description("Pull environment variables from EnvBox")
     .version("0.1.0");
-// کامند init
+// کامند join — مسیر اصلی برای developer تازه‌دعوت‌شده.
+// یک invite token یک‌بارمصرف (که مدیر از تب Members ساخته) می‌گیرد، آن را به
+// /api/v1/join می‌فرستد، و سرور در ازایش یک api_key تازه برمی‌گرداند که اینجا
+// در .envboxrc ذخیره می‌شود. بعد از این، دیگر همین token کار نمی‌کند (یک‌بارمصرف).
+program
+    .command("join")
+    .description("Join a project using a one-time invite token")
+    .argument("<token>", "Invite token from your project admin")
+    .option("--url <url>", "EnvBox API URL", "https://envbox.vercel.app")
+    .action(async (token, options) => {
+    const url = options.url;
+    console.log("🔗 Joining project...");
+    const response = await fetch(`${url}/api/v1/join`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token }),
+    }).catch(() => null);
+    if (!response) {
+        console.error(`❌ Couldn't reach ${url}. Is the server running?`);
+        process.exit(1);
+    }
+    if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        console.error(`❌ ${error.error || "This invite link is invalid or has expired."}`);
+        process.exit(1);
+    }
+    const { apiKey } = await response.json();
+    saveConfig({ apiKey, url });
+    addToGitignore();
+    console.log("✅ Joined! Your API key has been saved to .envboxrc");
+    console.log("   Now you can run:");
+    console.log("   npx envbox-cli pull dev");
+    console.log("   npx envbox-cli pull staging");
+    console.log("   npx envbox-cli pull prod");
+});
+// کامند init — برای وقتی که کلید از یک مسیر دیگر (نه invite token تازه) به
+// دست developer رسیده، مثلاً از یک secret manager یا CI/CD. این کامند کلیدی
+// نمی‌سازد، فقط یک کلید موجود را روی این دستگاه ذخیره می‌کند.
 program
     .command("init")
-    .description("Initialize EnvBox in this project (run once)")
+    .description("Save an existing API key on this machine (no invite needed)")
     .requiredOption("--key <apiKey>", "API key from EnvBox dashboard")
-    .option("--url <url>", "EnvBox API URL", "http://localhost:3000")
+    .option("--url <url>", "EnvBox API URL", "https://envbox.vercel.app")
     .action((options) => {
     saveConfig({ apiKey: options.key, url: options.url });
     addToGitignore();
     console.log("✅ Config saved. Now you can run:");
-    console.log("   npx envbox pull --env staging");
-    console.log("   npx envbox pull --env production");
+    console.log("   npx envbox-cli pull dev");
+    console.log("   npx envbox-cli pull staging");
+    console.log("   npx envbox-cli pull prod");
 });
 // کامند pull
 program
     .command("pull")
     .description("Pull variables and write to .env")
-    .requiredOption("--env <environment>", "Target environment (development, staging, production)")
+    .argument("<environment>", "Target environment: dev, staging, or prod")
     .option("--key <apiKey>", "API key (reads from .envboxrc if not provided)")
     .option("--url <url>", "EnvBox API URL")
-    .action(async (options) => {
+    .action(async (environment, options) => {
+    validateEnv(environment);
     const config = loadConfig();
     // اولویت: flag > config > default
     const key = options.key || config?.apiKey;
-    const url = options.url || config?.url || "http://localhost:3000";
+    const url = options.url || config?.url || "https://envbox.vercel.app";
     if (!key) {
         console.error("❌ No API key found.");
-        console.error("   Run: npx envbox init --key=envbox_sk_xxx");
+        console.error("   Run: npx envbox-cli join <token>");
+        console.error("   or:  npx envbox-cli init --key evb_sk_xxx");
         process.exit(1);
     }
-    await doPull(options.env, key, url);
+    await doPull(environment, key, url);
 });
 program.parse();
-// bash _next.js/envbox/cli :
-// $ pnpm dev init --key envbox_sk_2ab
-// $ pnpm dev pull --env staging/development/production
 // bash _next.js/envbox :
-// $ pnpm tsx cli/src/index.ts init --key envbox_sk_2ab
-// $ pnpm tsx cli/src/index.ts pull --env staging/development/production
+// $ pnpm tsx cli/src/index.ts join evb_invite_xxx
+// $ pnpm tsx cli/src/index.ts pull dev
