@@ -19,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/components/ui/select";
+import { inviteMember } from "@/features/members/members.actions";
 
 interface Props {
   environments: { id: string; name: string }[];
@@ -45,9 +46,20 @@ export function InviteMemberDialog({ environments, projectId }: Props) {
     e.preventDefault();
     setLoading(true);
 
-    // TODO: صدا زدن Server Action inviteMember
+    try {
+      const result = await inviteMember({
+        projectId,
+        environmentIds: selectedEnvs,
+        expiry: expiry as "1h" | "6h" | "24h",
+        inviteEmail: email || undefined,
+      });
 
-    setLoading(false);
+      setCommand(result.command);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
