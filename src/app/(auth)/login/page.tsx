@@ -23,8 +23,8 @@ type Tab = "signin" | "signup" | "email-verification" | "forgot-password";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("delivered@resend.dev");
-  const [selectedTab, setSelectedTab] = useState<Tab>("email-verification");
+  const [email, setEmail] = useState("");
+  const [selectedTab, setSelectedTab] = useState<Tab>("signin");
 
   const { data: session, isPending } = authClient.useSession();
 
@@ -36,6 +36,11 @@ export default function LoginPage() {
 
   // Don't flash the login form while checking session
   if (isPending) return null;
+
+  function openEmailVerificationTab(email: string) {
+    setEmail(email);
+    setSelectedTab("email-verification");
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
@@ -58,7 +63,7 @@ export default function LoginPage() {
               <CardTitle className="text-2xl font-bold">Sign In</CardTitle>
             </CardHeader>
             <CardContent>
-              <SignInTab />
+              <SignInTab openEmailVerificationTab={openEmailVerificationTab} />
             </CardContent>
           </Card>
         </TabsContent>
@@ -69,7 +74,7 @@ export default function LoginPage() {
               <CardTitle className="text-2xl font-bold">Sign Up</CardTitle>
             </CardHeader>
             <CardContent>
-              <SignUpTab />
+              <SignUpTab openEmailVerificationTab={openEmailVerificationTab} />
             </CardContent>
           </Card>
         </TabsContent>
