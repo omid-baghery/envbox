@@ -11,6 +11,8 @@ export const auth = betterAuth({
     provider: "pg",
     schema,
   }),
+
+  // ============================= test with : delivered@resend.dev
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,
@@ -25,6 +27,8 @@ export const auth = betterAuth({
       await sendEmailVerificationEmail({ user, url });
     },
   },
+
+  // =======================
   session: {
     cookieCache: {
       enabled: true,
