@@ -11,6 +11,20 @@ export const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
+    requireEmailVerification: true,
+    sendChangeEmailVerification: async ({ user, url, newEmail }) => {
+      await sendEmailVerificationEmail({
+        user: { ...user, email: newEmail },
+        url,
+      });
+    },
+  },
+  emailVerification: {
+    autoSignInAfterVerification: true,
+    sendOnSignUp: true,
+    sendVerificationEmail: async ({ user, url }) => {
+      await sendEmailVerificationEmail({ user, url });
+    },
   },
   session: {
     cookieCache: {
