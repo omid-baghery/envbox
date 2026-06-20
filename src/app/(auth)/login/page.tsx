@@ -12,12 +12,13 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/shared/components/ui/tabs";
-import SignInTab from "./_components/sign-in-tab";
-import SignUpTab from "./_components/sign-up-tab";
+
 import { authClient } from "@/features/auth/auth-client";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import EmailVerification from "./_components/email-verification";
+import { SignInTab } from "./_components/sign-in-tab";
+import { SignUpTab } from "./_components/sign-up-tab";
 
 type Tab = "signin" | "signup" | "email-verification" | "forgot-password";
 
@@ -26,16 +27,11 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [selectedTab, setSelectedTab] = useState<Tab>("signin");
 
-  const { data: session, isPending } = authClient.useSession();
-
-  // Redirect if already logged in
-  if (!isPending && session) {
-    router.push("/");
-    return null;
-  }
-
-  // Don't flash the login form while checking session
-  if (isPending) return null;
+  useEffect(() => {
+    authClient.getSession().then((session) => {
+      if (session.data != null) router.push("/");
+    });
+  }, [router]);
 
   function openEmailVerificationTab(email: string) {
     setEmail(email);
