@@ -1,42 +1,38 @@
-"use client";
-
-import { authClient } from "@/features/auth/auth-client";
-import { Button } from "@/shared/components/ui/button";
+import { auth } from "@/features/auth/auth";
+import { headers } from "next/headers";
 import Link from "next/link";
+import { Button } from "@/shared/components/ui/button";
+import { SignOutButton } from "./_components/sign-out-button";
 
-export default function Home() {
-  const { data: session, isPending: loading } = authClient.useSession();
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+export default async function Home() {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
 
   return (
-    <div className="my-6 px-4 max-w-md mx-auto">
-      <div className="text-center space-y-6">
+    <div className="flex min-h-screen items-center justify-center">
+      <div className="text-center space-y-6 max-w-md px-4">
         {!session ? (
           <>
-            <h1 className="text-3xl font-bold">Welcome to EnvBox</h1>
+            <h1 className="text-3xl font-bold">EnvBox</h1>
             <p className="text-muted-foreground">
-              Secure your environment variables
+              Secure environment variables for your team.
             </p>
             <Button asChild size="lg">
-              <Link href="/login">Sign In / Sign Up</Link>
+              <Link href="/login">Get Started</Link>
             </Button>
           </>
         ) : (
           <>
-            <h1 className="text-3xl font-bold">Welcome {session.user.name}!</h1>
-            <Button asChild size="lg">
-              <Link href="/dashboard">Go to Dashboard</Link>
-            </Button>
-            <Button
-              size={"lg"}
-              variant={"destructive"}
-              onClick={() => authClient.signOut()}
-            >
-              Sign Out
-            </Button>
+            <h1 className="text-3xl font-bold">
+              Welcome back, {session.user.name}!
+            </h1>
+            <div className="flex gap-3 justify-center">
+              <Button asChild size="lg">
+                <Link href="/dashboard">Dashboard</Link>
+              </Button>
+              <SignOutButton />
+            </div>
           </>
         )}
       </div>
