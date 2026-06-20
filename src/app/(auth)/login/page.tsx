@@ -24,7 +24,7 @@ type Tab = "signin" | "signup" | "email-verification" | "forgot-password";
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("delivered@resend.dev");
-  const [selectedTab, setSelectedTab] = useState<Tab>("signin");
+  const [selectedTab, setSelectedTab] = useState<Tab>("email-verification");
 
   const { data: session, isPending } = authClient.useSession();
 
@@ -45,10 +45,12 @@ export default function LoginPage() {
         defaultValue="signin"
         className="w-full max-w-sm"
       >
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="signin">Sign In</TabsTrigger>
-          <TabsTrigger value="signup">Sign Up</TabsTrigger>
-        </TabsList>
+        {(selectedTab === "signin" || selectedTab === "signup") && (
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="signin">Sign In</TabsTrigger>
+            <TabsTrigger value="signup">Sign Up</TabsTrigger>
+          </TabsList>
+        )}
 
         <TabsContent value="signin">
           <Card>
