@@ -17,12 +17,13 @@ import SignUpTab from "./_components/sign-up-tab";
 import { authClient } from "@/features/auth/auth-client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import EmailVerification from "./_components/email-verification";
 
 type Tab = "signin" | "signup" | "email-verification" | "forgot-password";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState("delivered@resend.dev");
   const [selectedTab, setSelectedTab] = useState<Tab>("signin");
 
   const { data: session, isPending } = authClient.useSession();
