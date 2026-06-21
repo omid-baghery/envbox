@@ -1,10 +1,10 @@
 import { auth } from "@/features/auth/auth";
 import { headers } from "next/headers";
 import Link from "next/link";
-import { Button } from "@/shared/components/ui/button";
-import { SignOutButton } from "./_components/sign-out-button";
 import { HeroCta } from "./_components/HeroCta";
 import { CommandPreview } from "./_components/command-preview";
+import { FeatureCard } from "./_components/feature-card";
+import { GitBranch, KeyRound, Lock, Users } from "lucide-react";
 
 export default async function Home() {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -62,6 +62,31 @@ export default async function Home() {
               <CommandPreview command="npx envbox-cli join evb_invite_f0" />
               <CommandPreview command="npx envbox-cli pull prod" />
             </div>
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-3xl px-6 pb-24">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <FeatureCard
+              icon={Lock}
+              title="Encrypted at rest"
+              description="Every value is encrypted with AES-256-GCM before it touches the database. Nothing is ever stored in plaintext."
+            />
+            <FeatureCard
+              icon={GitBranch}
+              title="Per-environment access"
+              description="Dev, staging, and production are separate from day one. Invite someone to just the environments they need."
+            />
+            <FeatureCard
+              icon={Users}
+              title="Time-limited invites"
+              description="Invite links expire in 1, 6, or 24 hours and can only be used once. No stale credentials floating around."
+            />
+            <FeatureCard
+              icon={KeyRound}
+              title="Revoke in one click"
+              description="Remove a teammate or revoke a single API key without touching anything else in the project."
+            />
           </div>
         </section>
       </main>
