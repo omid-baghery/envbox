@@ -89,6 +89,55 @@ export default async function Home() {
             />
           </div>
         </section>
+
+        <section className="mx-auto max-w-2xl px-6 pb-24">
+          <h2 className="text-lg font-medium text-center mb-8">How it works</h2>
+
+          <div className="grid gap-4">
+            <div className="flex gap-4 items-start">
+              <div className="w-7 h-7 rounded-full bg-foreground text-background flex items-center justify-center text-xs font-medium shrink-0">
+                1
+              </div>
+              <div>
+                <p className="text-sm font-medium">
+                  Create a project & add variables
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Sign up, create a project, and add your environment variables
+                  through the dashboard. Each value is encrypted before storage.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-4 items-start">
+              <div className="w-7 h-7 rounded-full bg-foreground text-background flex items-center justify-center text-xs font-medium shrink-0">
+                2
+              </div>
+              <div>
+                <p className="text-sm font-medium">Invite your team</p>
+                <p className="text-sm text-muted-foreground">
+                  Go to the Members tab, invite by email, choose which
+                  environments they can access, and share the one-time command.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-4 items-start">
+              <div className="w-7 h-7 rounded-full bg-foreground text-background flex items-center justify-center text-xs font-medium shrink-0">
+                3
+              </div>
+              <div>
+                <p className="text-sm font-medium">Team members join & pull</p>
+                <p className="text-sm text-muted-foreground">
+                  They run the join command once — it saves an encrypted config
+                  file (auto-added to .gitignore). After that, a single{" "}
+                  <code className="text-xs bg-muted px-1 rounded">pull</code>{" "}
+                  command creates their .env file.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
     </div>
   );
