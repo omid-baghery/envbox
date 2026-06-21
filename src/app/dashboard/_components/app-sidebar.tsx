@@ -15,7 +15,7 @@ export function AppSidebar() {
     pathname === href || pathname.startsWith(href + "/");
 
   return (
-    <aside className="flex w-48 flex-shrink-0 flex-col border-r border-border bg-background">
+    <aside className="hidden md:flex w-48 flex-shrink-0 flex-col border-r border-border bg-background">
       {/* لوگو */}
       <Link href={"/"}>
         <div className="flex h-11 items-center gap-2 border-b border-border px-4">
@@ -25,7 +25,6 @@ export function AppSidebar() {
           <span className="text-sm font-medium">EnvBox</span>
         </div>
       </Link>
-
       {/* لینک‌ها */}
       <nav className="flex flex-1 flex-col gap-0.5 px-2 py-3">
         <Link
@@ -55,7 +54,6 @@ export function AppSidebar() {
           Projects
         </Link>
       </nav>
-
       {/* Sign out */}
       <div className="border-t border-border px-2 py-2">
         <button
