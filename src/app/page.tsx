@@ -3,14 +3,14 @@ import { headers } from "next/headers";
 import Link from "next/link";
 import { Button } from "@/shared/components/ui/button";
 import { SignOutButton } from "./_components/sign-out-button";
+import { HeroCta } from "./_components/HeroCta";
 
 export default async function Home() {
   const session = await auth.api.getSession({ headers: await headers() });
   const isSignedIn = !!session;
 
   return (
-    <div className="flex min-h-screen items-center justify-center">
-      
+    <div className="flex min-h-screen flex-col">
       <header className="flex h-14 items-center justify-between border-b border-border px-6">
         <div className="flex items-center gap-2">
           <div className="flex h-6 w-6 items-center justify-center rounded bg-foreground">
@@ -37,31 +37,21 @@ export default async function Home() {
         </nav>
       </header>
 
-      <div className="text-center space-y-6 max-w-md px-4">
-        {!session ? (
-          <>
-            <h1 className="text-3xl font-bold">EnvBox</h1>
-            <p className="text-muted-foreground">
-              Secure environment variables for your team.
-            </p>
-            <Button asChild size="lg">
-              <Link href="/login">Get Started</Link>
-            </Button>
-          </>
-        ) : (
-          <>
-            <h1 className="text-3xl font-bold">
-              Welcome back, {session.user.name}!
-            </h1>
-            <div className="flex gap-3 justify-center">
-              <Button asChild size="lg">
-                <Link href="/dashboard">Dashboard</Link>
-              </Button>
-              <SignOutButton />
-            </div>
-          </>
-        )}
-      </div>
+      <main className="flex-1">
+        <section className="mx-auto max-w-2xl px-6 py-20 text-center">
+          <h1 className="mb-4 text-3xl font-medium text-foreground sm:text-4xl">
+            Environment variables, shared safely
+          </h1>
+          <p className="mb-8 text-base leading-relaxed text-muted-foreground">
+            Stop pasting secrets into Slack. Invite your team, scope access to
+            the right environment, and let everyone pull what they need with one
+            command.
+          </p>
+          <div className="flex justify-center">
+            <HeroCta isSignedIn={isSignedIn} />
+          </div>
+        </section>
+      </main>
     </div>
   );
 }
