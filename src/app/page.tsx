@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Button } from "@/shared/components/ui/button";
 import { SignOutButton } from "./_components/sign-out-button";
 import { HeroCta } from "./_components/HeroCta";
+import { CommandPreview } from "./_components/command-preview";
 
 export default async function Home() {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -49,6 +50,18 @@ export default async function Home() {
           </p>
           <div className="flex justify-center">
             <HeroCta isSignedIn={isSignedIn} />
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-2xl px-6 pb-20">
+          <div className="rounded-xl border border-border bg-muted/20 p-6">
+            <p className="mb-4 text-xs uppercase tracking-wider text-muted-foreground/70">
+              From invite to pull, in two commands
+            </p>
+            <div className="flex flex-col gap-3">
+              <CommandPreview command="npx envbox-cli join evb_invite_f0" />
+              <CommandPreview command="npx envbox-cli pull prod" />
+            </div>
           </div>
         </section>
       </main>
