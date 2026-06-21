@@ -5,8 +5,8 @@ const resend = new Resend(process.env.RESEND_API_KEY!);
 export async function GET() {
   try {
     const result = await resend.emails.send({
-      from: "EnvBox <onboarding@resend.dev>",
-      to: "omid.b193@gmail.com", // ایمیل واقعی خودت
+      from: "EnvBox <hello@envbox.omidbagheri.com>",
+      to: "sezar.b193@gmail.com", 
       subject: "Test from EnvBox",
       html: "<p>If you see this, Resend works!</p>",
     });
