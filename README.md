@@ -144,18 +144,13 @@ pnpm test
 
 ## 👤 Author
 
-**Built by Omid Bagheri** — Full-stack developer from Iran.
+**Built by Omid Bagheri** — Full-stack developer. Open to collaboration, and new opportunities.
 
-I started as a WordPress designer and turned into a full-stack developer during difficult times in Iran. I learned React and Next.js through internet blackouts, weak connections, and real client projects.
-
-EnvBox was born from the pain I experienced firsthand while managing environment variables for teams under tough conditions.
-
-I'd genuinely appreciate your feedback.
+Love it? Hate it? I'd genuinely appreciate your feedback.
 
 - [LinkedIn](https://www.linkedin.com/in/omid-baghery/)
 - [GitHub](https://github.com/omid-baghery)
 - [Portfolio](https://b-square.vercel.app/team/omid)
-
 <br>
 
 ## 📄 License
