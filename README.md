@@ -1,24 +1,32 @@
 # EnvBox
 
-> Stop sharing .env files in Slack. Two commands, zero complexity.
+> **Stop sharing `.env` files in Slack.**  
+> Two commands. Zero complexity. Full security.
 
-[![Live](https://img.shields.io/badge/Live-envbox.omidbagheri.com-blue)](https://envbox.omidbagheri.com)
-[![npm](https://img.shields.io/npm/v/envbox-cli?label=npm)](https://www.npmjs.com/package/envbox-cli)
+[![Live Demo](https://img.shields.io/badge/Live-envbox.omidbagheri.com-blue)](https://envbox.omidbagheri.com)
+[![npm](https://img.shields.io/npm/v/envbox-cli)](https://www.npmjs.com/package/envbox-cli)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-![home-page](https://envbox.omidbagheri.com/readme/1-home-page.png)
+![Hero](https://envbox.omidbagheri.com/readme/1-home-page.png)
+
+> 🚧 This is an MVP. More features coming soon.
 
 <br>
 
 ## 🔐 What is EnvBox?
 
-EnvBox keeps your team's environment variables **encrypted, organized, and accessible** with a single command. No more copy-pasting `.env` files in Slack or Telegram.
+EnvBox keeps your team's environment variables **encrypted, organized, and accessible** with just two simple commands.
 
-| Instead of this                  | Do this                                |
-| -------------------------------- | -------------------------------------- |
-| "Hey, can you send me the .env?" | ✅ `npx envbox-cli pull dev`           |
-| "Is this the latest version?"    | ✅ Always pulls from source            |
-| "Who has production access?"     | ✅ Invite tokens with env restrictions |
+No more copy-pasting `.env` files, no version conflicts, and no security risks when someone leaves the team.
+
+You store everything in one secure place and grant access using time-limited invite tokens.
+
+| Instead of this                  | Do this                                        |
+| -------------------------------- | ---------------------------------------------- |
+| "Hey, can you send me the .env?" | ✅ `npx envbox-cli join <token>`               |
+| "Is this the latest version?"    | ✅ `npx envbox-cli pull dev`                   |
+| "Who has production access?"     | ✅ Invite tokens with environment restrictions |
+| "Ali is no longer on the team"   | ✅ Just revoke his API key                     |
 
 <br>
 
@@ -50,7 +58,7 @@ EnvBox keeps your team's environment variables **encrypted, organized, and acces
       </td>
       <td width="50%">
         <h3>👥 Invite Members</h3>
-        <p>Generate one-time tokens with environment restrictions. Share via Slack, email, or smoke signals.</p>
+        <p>Generate one-time tokens with environment restrictions. Share via Slack, email, or anywhere.</p>
       </td>
     </tr>
     <tr>
@@ -59,7 +67,7 @@ EnvBox keeps your team's environment variables **encrypted, organized, and acces
       </td>
       <td width="50%">
         <h3>💻 One Command to Join</h3>
-        <p>Your team runs a single command in their terminal. No install, no setup.</p>
+        <p>Your team runs a single command in their terminal. No install, no manual setup.</p>
       </td>
     </tr>
   </table>
@@ -69,17 +77,17 @@ EnvBox keeps your team's environment variables **encrypted, organized, and acces
 
 ## ⚡ How It Works (for your team)
 
-When a team member joins, EnvBox creates a `.envboxrc` file containing their API key and server URL. This file is **automatically added to `.gitignore`** — no manual setup needed.
+When a team member joins, EnvBox automatically creates a `.envboxrc` file containing their API key and server URL. This file is **automatically added to `.gitignore`** — no manual setup needed.
 
-After joining, team members can pull variables for any environment they have permission to access:
+After joining, team members can easily pull the latest variables for any environment they have access to:
 
 ```bash
 npx envbox-cli pull dev
-npx envbox-cli pull staging  
+npx envbox-cli pull staging
 npx envbox-cli pull prod
 ```
 
-Three environments available: `dev`, `staging`, and `prod`.
+Three default environments are available: `dev`, `staging`, and `prod`.
 
 <br>
 
@@ -97,14 +105,10 @@ Three environments available: `dev`, `staging`, and `prod`.
 
 ## 🛠 Tech Stack
 
-**Frontend:** Next.js 16, TypeScript, Tailwind CSS, shadcn/ui, react-hook-form, Zod
-
-**Backend:** Next.js API Routes, Better-Auth, Drizzle ORM, PostgreSQL (Neon)
-
-**CLI:** Commander.js, published on npm
-
-**Security:** AES-256-GCM, SHA-256, Resend (emails)
-
+**Frontend:** Next.js 16, TypeScript, Tailwind CSS, shadcn/ui, react-hook-form, Zod  
+**Backend:** Next.js API Routes, Better-Auth, Drizzle ORM, PostgreSQL (Neon)  
+**CLI:** Commander.js, published on npm  
+**Security:** AES-256-GCM, SHA-256, Resend (emails)  
 **Deployment:** Vercel (dashboard), Neon (database), npm (CLI)
 
 <br>
@@ -112,17 +116,16 @@ Three environments available: `dev`, `staging`, and `prod`.
 ## 📦 CLI
 
 ```bash
-# Install globally
-npm install -g envbox-cli
-
-# Already have an API key? Use it on another machine:
-npx envbox-cli init --key <your-api-key>
-
-# Join a project (no install needed):
+# Join a project (no install needed)
 npx envbox-cli join <token>
 
-# Pull variables:
+# Pull variables
 npx envbox-cli pull dev
+npx envbox-cli pull staging
+npx envbox-cli pull prod
+
+# Install globally (optional)
+npm install -g envbox-cli
 ```
 
 [![npm](https://img.shields.io/npm/v/envbox-cli?label=envbox-cli)](https://www.npmjs.com/package/envbox-cli)
@@ -141,7 +144,13 @@ pnpm test
 
 ## 👤 Author
 
-Built by **Omid Bagheri** — Full-stack developer from Iran. Learned React during internet blackouts. Building secure tools for teams.
+**Built by Omid Bagheri** — Full-stack developer from Iran.
+
+I started as a WordPress designer and turned into a full-stack developer during difficult times in Iran. I learned React and Next.js through internet blackouts, weak connections, and real client projects.
+
+EnvBox was born from the pain I experienced firsthand while managing environment variables for teams under tough conditions.
+
+I'd genuinely appreciate your feedback.
 
 - [LinkedIn](https://www.linkedin.com/in/omid-baghery/)
 - [GitHub](https://github.com/omid-baghery)
