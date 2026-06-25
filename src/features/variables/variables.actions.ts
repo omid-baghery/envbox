@@ -8,8 +8,10 @@ import { encrypt } from "@/shared/lib/encryption";
 import { randomUUID } from "crypto";
 import { revalidatePath } from "next/cache";
 
-// ========== helper function چک کردن مالکیت انوایرمنت که متعلق به همین پروژه باشه
-async function assertEnvironmentBelongsToProject(
+// ========================================= helper function
+
+// چک کردن مالکیت انوایرمنت که متعلق به همین پروژه باشه
+async function assertEnvBelongsToProject(
   environmentId: string,
   projectId: string,
 ) {
@@ -27,7 +29,19 @@ async function assertEnvironmentBelongsToProject(
   if (!env) throw new Error("Environment not found in this project");
 }
 
-// ========== گرفتن داده ها از فرم
+// ریولیدیت کردن صفحه برای بعد از تغییر
+async function revalidateProject(projectId: string) {
+  const [project] = await db
+    .select({ slug: projects.slug })
+    .from(projects)
+    .where(eq(projects.id, projectId))
+    .limit(1);
+
+  if (project) revalidatePath(`/dashboard/projects/${project.slug}`);
+}
+
+// ========================================= عملیات ها
+
 export async function addVariable(formData: FormData) {
   const key = (formData.get("key") as string)?.trim();
   const value = formData.get("value") as string;
@@ -41,7 +55,7 @@ export async function addVariable(formData: FormData) {
   // چک می‌کند کاربر فعلی واقعاً عضو فعال همین پروژه است —
   // بدون این، هر کاربر لاگین‌شده می‌توانست variable به پروژه‌ی هرکسی اضافه کند.
   await requireProjectMember(projectId);
-  await assertEnvironmentBelongsToProject(environmentId, projectId);
+  await assertEnvBelongsToProject(environmentId, projectId);
 
   const encryptedValue = encrypt(value);
 
@@ -53,13 +67,7 @@ export async function addVariable(formData: FormData) {
     projectId,
   });
 
-  const [project] = await db
-    .select({ slug: projects.slug })
-    .from(projects)
-    .where(eq(projects.id, projectId))
-    .limit(1);
-
-  if (project) revalidatePath(`/dashboard/projects/${project.slug}`);
+  await revalidateProject(projectId);
   return { success: true };
 }
 
@@ -85,6 +93,8 @@ export async function updateVariable(input: {
     .returning();
 
   if (!updated) throw new Error("Variable not found");
+  await revalidateProject(input.projectId);
+
   return { success: true };
 }
 
@@ -99,5 +109,7 @@ export async function deleteVariable(projectId: string, variableId: string) {
     .returning();
 
   if (!deleted) throw new Error("Variable not found");
+  await revalidateProject(projectId);
+
   return { success: true };
 }

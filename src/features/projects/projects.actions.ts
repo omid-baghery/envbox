@@ -22,9 +22,16 @@ export async function createProject(formData: FormData) {
   const projectId = randomUUID();
   const environmentIds: string[] = [];
 
-  // یک تراکنش: یا همه‌چیز ساخته می‌شود یا هیچ‌چیز — اگر وسط کار خطا بیاید
-  // (مثلاً slug تکراری)، یک پروژه‌ی نصفه‌کاره بدون owner در project_members نمی‌ماند.
+  // transaction یعنی همه یا هیچ. اگه یکی از مراحل فیل شه کلش فیل میشه
   await db.transaction(async (tx) => {
+    const envRows = ENV_NAMES.map((envName) => ({
+      id: randomUUID(),
+      name: envName,
+      projectId,
+    }));
+    envRows.forEach((e) => environmentIds.push(e.id));
+
+    // 1. پروژه رو بساز
     await tx.insert(projects).values({
       id: projectId,
       name,
@@ -32,15 +39,10 @@ export async function createProject(formData: FormData) {
       ownerId: session.user.id,
     });
 
-    const envRows = ENV_NAMES.map((envName) => ({
-      id: randomUUID(),
-      name: envName,
-      projectId,
-    }));
-    envRows.forEach((e) => environmentIds.push(e.id));
+    // 2. environment ها رو بساز
     await tx.insert(environments).values(envRows);
 
-    // owner هم یک ردیف در project_members دارد، با دسترسی به همه‌ی environment ها.
+    // 3. اضافه کردن اونر به پراجکت ممبر واسه دسترسی داشتنش
     await tx.insert(projectMembers).values({
       id: randomUUID(),
       projectId,
@@ -92,8 +94,6 @@ export async function deleteProject(projectId: string) {
     throw new Error("Project not found or you are not the owner");
   }
 
-  // environments, project_members, invite_tokens, variables, api_keys
-  // همه با onDelete: "cascade" در schema خودکار پاک می‌شوند.
   revalidatePath("/dashboard");
   return { success: true };
 }
