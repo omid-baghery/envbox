@@ -3,7 +3,7 @@
 import { db } from "@/shared/db";
 import { environments, projects, variables } from "@/shared/db/schema";
 import { and, eq } from "drizzle-orm";
-import { requireProjectMember } from "../projects/authorization";
+import { requireProjectMember } from "../../shared/lib/authorization";
 import { encrypt } from "@/shared/lib/encryption";
 import { randomUUID } from "crypto";
 import { revalidatePath } from "next/cache";

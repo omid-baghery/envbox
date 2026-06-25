@@ -2,7 +2,7 @@
 
 import { db } from "@/shared/db";
 import { projects, environments, projectMembers } from "@/shared/db/schema";
-import { requireSession } from "./authorization";
+import { requireSession } from "../../shared/lib/authorization";
 import { revalidatePath } from "next/cache";
 import { randomUUID } from "crypto";
 import { and, eq } from "drizzle-orm";

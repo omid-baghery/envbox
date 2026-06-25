@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/shared/db";
-import { requireProjectOwner } from "../projects/authorization";
+import { requireProjectOwner } from "../../shared/lib/authorization";
 import {
   apiKeys,
   environments,
