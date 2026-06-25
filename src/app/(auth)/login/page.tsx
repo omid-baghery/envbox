@@ -3,6 +3,7 @@
 import {
   Card,
   CardContent,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/shared/components/ui/card";
@@ -19,6 +20,7 @@ import { useEffect, useState } from "react";
 import EmailVerification from "./_components/email-verification";
 import { SignInTab } from "./_components/sign-in-tab";
 import { SignUpTab } from "./_components/sign-up-tab";
+import { SocialAuthButtons } from "./_components/social-auth-buttons";
 
 type Tab = "signin" | "signup" | "email-verification" | "forgot-password";
 
@@ -61,6 +63,9 @@ export default function LoginPage() {
             <CardContent>
               <SignInTab openEmailVerificationTab={openEmailVerificationTab} />
             </CardContent>
+            <CardFooter>
+              <SocialAuthButtons />
+            </CardFooter>
           </Card>
         </TabsContent>
 
@@ -72,6 +77,9 @@ export default function LoginPage() {
             <CardContent>
               <SignUpTab openEmailVerificationTab={openEmailVerificationTab} />
             </CardContent>
+            <CardFooter>
+              <SocialAuthButtons />
+            </CardFooter>
           </Card>
         </TabsContent>
 
