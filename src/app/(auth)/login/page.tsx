@@ -1,99 +1,59 @@
 "use client";
 
+import Link from "next/link";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
 } from "@/shared/components/ui/card";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/shared/components/ui/tabs";
-
-import { authClient } from "@/features/auth/auth-client";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import EmailVerification from "./_components/email-verification";
-import { SignInTab } from "./_components/sign-in-tab";
-import { SignUpTab } from "./_components/sign-up-tab";
-import { SocialAuthButtons } from "./_components/social-auth-buttons";
-
-type Tab = "signin" | "signup" | "email-verification" | "forgot-password";
+import { Separator } from "@/shared/components/ui/separator";
+import { SocialAuthButtons } from "../_components/social-auth-buttons";
+import { SignInForm } from "./_components/sign-in-form";
 
 export default function LoginPage() {
-  const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [selectedTab, setSelectedTab] = useState<Tab>("signin");
-
-  useEffect(() => {
-    authClient.getSession().then((session) => {
-      if (session.data != null) router.push("/");
-    });
-  }, [router]);
-
-  function openEmailVerificationTab(email: string) {
-    setEmail(email);
-    setSelectedTab("email-verification");
-  }
-
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
-      <Tabs
-        value={selectedTab}
-        onValueChange={(t) => setSelectedTab(t as Tab)}
-        defaultValue="signin"
-        className="w-full max-w-sm"
-      >
-        {(selectedTab === "signin" || selectedTab === "signup") && (
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="signin">Sign In</TabsTrigger>
-            <TabsTrigger value="signup">Sign Up</TabsTrigger>
-          </TabsList>
-        )}
+      <Card className="w-full max-w-sm">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
+          <CardDescription>Sign in to your account</CardDescription>
+        </CardHeader>
 
-        <TabsContent value="signin">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-2xl font-bold">Sign In</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <SignInTab openEmailVerificationTab={openEmailVerificationTab} />
-            </CardContent>
-            <CardFooter>
-              <SocialAuthButtons />
-            </CardFooter>
-          </Card>
-        </TabsContent>
+        <CardContent className="space-y-4">
+          {/* Social */}
+          <SocialAuthButtons />
 
-        <TabsContent value="signup">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-2xl font-bold">Sign Up</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <SignUpTab openEmailVerificationTab={openEmailVerificationTab} />
-            </CardContent>
-            <CardFooter>
-              <SocialAuthButtons />
-            </CardFooter>
-          </Card>
-        </TabsContent>
+          {/* Divider */}
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <Separator />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-card px-2 text-muted-foreground">
+                or continue with email
+              </span>
+            </div>
+          </div>
 
-        <TabsContent value="email-verification">
-          <Card>
-            <CardHeader className="text-2xl font-bold">
-              <CardTitle>Verify Your Email</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <EmailVerification email={email} />
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+          {/* Email Form */}
+          <SignInForm />
+        </CardContent>
+
+        <CardFooter className="justify-center">
+          <p className="text-sm text-muted-foreground">
+            Don&apos;t have an account?{" "}
+            <Link
+              href="/register"
+              className="font-medium text-foreground hover:underline"
+            >
+              Sign up
+            </Link>
+          </p>
+        </CardFooter>
+      </Card>
     </div>
   );
 }
