@@ -1,7 +1,7 @@
 import { auth } from "@/features/auth/auth";
 import { headers } from "next/headers";
 import Link from "next/link";
-import { HeroCta } from "./_components/HeroCta";
+import { HeroCta } from "./_components/Hero-cta";
 import { CommandPreview } from "./_components/command-preview";
 import { FeatureCard } from "./_components/feature-card";
 import { GitBranch, KeyRound, Lock, Users } from "lucide-react";
