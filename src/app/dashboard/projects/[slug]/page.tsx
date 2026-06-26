@@ -16,7 +16,8 @@ import {
 import { AddVariableDialog } from "./_components/add-variable-dialog";
 import { Button } from "@/shared/components/ui/button";
 import { InviteMemberDialog } from "./_components/invite-member-dialog";
-import { Copy, Eye, Pencil, Trash2 } from "lucide-react";
+import { Copy, Eye, Pencil } from "lucide-react";
+import { DeleteVariableButton } from "./_components/delete-variable-button";
 
 export default async function ProjectPage({
   params,
@@ -149,9 +150,10 @@ export default async function ProjectPage({
                               <button className="p-1 text-muted-foreground hover:text-foreground">
                                 <Pencil size={14} />
                               </button>
-                              <button className="p-1 text-muted-foreground hover:text-red-500">
-                                <Trash2 size={14} />
-                              </button>
+                              <DeleteVariableButton
+                                projectId={project.id}
+                                variableId={v.id}
+                              />
                             </div>
                           </td>
                         </tr>
