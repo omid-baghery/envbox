@@ -76,14 +76,26 @@ export async function updateVariable(input: {
   variableId: string;
   key: string;
   value: string;
+  environmentId?: string;
 }) {
   await requireProjectMember(input.projectId);
 
   const encryptedValue = encrypt(input.value);
 
+  const updateData: Record<string, unknown> = {
+    key: input.key.trim(),
+    encryptedValue,
+    updatedAt: new Date(),
+  };
+
+  // اگه environmentId فرستاده شده، اونم آپدیت کن
+  if (input.environmentId) {
+    updateData.environmentId = input.environmentId;
+  }
+
   const [updated] = await db
     .update(variables)
-    .set({ key: input.key.trim(), encryptedValue, updatedAt: new Date() })
+    .set(updateData)
     .where(
       and(
         eq(variables.id, input.variableId),
@@ -97,7 +109,6 @@ export async function updateVariable(input: {
 
   return { success: true };
 }
-
 export async function deleteVariable(projectId: string, variableId: string) {
   await requireProjectMember(projectId);
 

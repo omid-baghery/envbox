@@ -16,10 +16,10 @@ import {
 import { AddVariableDialog } from "./_components/add-variable-dialog";
 import { Button } from "@/shared/components/ui/button";
 import { InviteMemberDialog } from "./_components/invite-member-dialog";
-import { Pencil } from "lucide-react";
 import { DeleteVariableButton } from "./_components/delete-variable-button";
 import { decrypt } from "@/shared/lib/encryption";
 import { CopyVariableButton } from "./_components/copy-variable-button";
+import { EditVariableDialog } from "./_components/edit-variable-dialog";
 
 export default async function ProjectPage({
   params,
@@ -148,9 +148,17 @@ export default async function ProjectPage({
                               variableKey={v.key}
                               value={v.decryptedValue}
                             />
-                            <button className="p-1 text-muted-foreground hover:text-foreground">
-                              <Pencil size={14} />
-                            </button>
+                            <EditVariableDialog
+                              projectId={project.id}
+                              variableId={v.id}
+                              currentKey={v.key}
+                              currentValue={v.decryptedValue}
+                              currentEnvironmentId={v.environmentId}
+                              environments={envs.map((e) => ({
+                                id: e.id,
+                                name: e.name,
+                              }))}
+                            />
                             <DeleteVariableButton
                               projectId={project.id}
                               variableId={v.id}
