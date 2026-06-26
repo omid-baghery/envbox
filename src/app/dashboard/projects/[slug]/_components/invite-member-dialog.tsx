@@ -63,7 +63,18 @@ export function InviteMemberDialog({ environments, projectId }: Props) {
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(isOpen) => {
+        setOpen(isOpen);
+        if (!isOpen) {
+          setCommand("");
+          setSelectedEnvs([]);
+          setEmail("");
+          setExpiry("24h");
+        }
+      }}
+    >
       <DialogTrigger asChild>
         <Button size="sm">Invite Member</Button>
       </DialogTrigger>

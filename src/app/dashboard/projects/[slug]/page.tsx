@@ -69,6 +69,18 @@ export default async function ProjectPage({
     .from(apiKeys)
     .where(eq(apiKeys.projectId, project.id));
 
+  const sortedMembers = [...members].sort((a, b) => {
+    const roleOrder = { owner: 0, member: 1 };
+    const statusOrder = { active: 0, pending: 1, removed: 2 };
+
+    return (
+      roleOrder[a.role as keyof typeof roleOrder] -
+        roleOrder[b.role as keyof typeof roleOrder] ||
+      statusOrder[a.status as keyof typeof statusOrder] -
+        statusOrder[b.status as keyof typeof statusOrder]
+    );
+  });
+
   return (
     <div className="mx-auto max-w-3xl px-6 py-6">
       <h1 className="text-base font-medium mb-6">{project.name}</h1>
@@ -190,7 +202,7 @@ export default async function ProjectPage({
             </div>
           ) : (
             <div className="flex flex-col gap-2">
-              {members.map((member) => {
+              {sortedMembers.map((member) => {
                 const isRemoved = member.status === "removed";
 
                 return (
