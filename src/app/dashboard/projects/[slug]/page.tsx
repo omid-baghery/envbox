@@ -75,199 +75,184 @@ export default async function ProjectPage({
 
         {/* تب Variables */}
         <TabsContent value="variables">
-          <TabsContent value="variables">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex gap-2">
-                {envs.map((env) => {
-                  const count = allVars.filter(
-                    (v) => v.environmentId === env.id,
-                  ).length;
-                  return (
-                    <div
-                      key={env.id}
-                      className="rounded-md border px-3 py-1.5 text-sm"
-                    >
-                      {env.name} ({count})
-                    </div>
-                  );
-                })}
-              </div>
-              <AddVariableDialog
-                environments={envs.map((e) => ({ id: e.id, name: e.name }))}
-                projectId={project.id}
-              />
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex gap-2">
+              {envs.map((env) => {
+                const count = allVars.filter(
+                  (v) => v.environmentId === env.id,
+                ).length;
+                return (
+                  <div
+                    key={env.id}
+                    className="rounded-md border px-3 py-1.5 text-sm"
+                  >
+                    {env.name} ({count})
+                  </div>
+                );
+              })}
             </div>
+            <AddVariableDialog
+              environments={envs.map((e) => ({ id: e.id, name: e.name }))}
+              projectId={project.id}
+            />
+          </div>
 
-            {allVars.length === 0 ? (
-              <div className="rounded-lg border border-dashed py-12 text-center">
-                <p className="text-sm text-muted-foreground">
-                  No variables yet.
-                </p>
-              </div>
-            ) : (
-              <div className="rounded-lg border">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="text-left px-4 py-2 text-xs text-muted-foreground uppercase">
-                        Key
-                      </th>
-                      <th className="text-left px-4 py-2 text-xs text-muted-foreground uppercase">
-                        Value
-                      </th>
-                      <th className="text-left px-4 py-2 text-xs text-muted-foreground uppercase">
-                        Environment
-                      </th>
-                      <th className="text-right px-4 py-2 text-xs text-muted-foreground uppercase">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {allVars.map((v) => {
-                      const env = envs.find((e) => e.id === v.environmentId);
-                      return (
-                        <tr key={v.id} className="border-b last:border-0">
-                          <td className="px-4 py-2 font-mono text-xs">
-                            {v.key}
-                          </td>
-                          <td className="px-4 py-2 font-mono text-xs text-muted-foreground">
-                            ••••••••••
-                          </td>
-                          <td className="px-4 py-2">
-                            <span className="text-xs px-2 py-0.5  rounded-full bg-muted">
-                              {env?.name || "unknown"}
-                            </span>
-                          </td>
-                          <td className="px-4 py-2 text-right">
-                            <div className="flex items-center justify-end gap-1">
-                              <button className="p-1 text-muted-foreground hover:text-foreground">
-                                <Eye size={14} />
-                              </button>
-                              <button className="p-1 text-muted-foreground hover:text-foreground">
-                                <Copy size={14} />
-                              </button>
-                              <button className="p-1 text-muted-foreground hover:text-foreground">
-                                <Pencil size={14} />
-                              </button>
-                              <DeleteVariableButton
-                                projectId={project.id}
-                                variableId={v.id}
-                              />
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </TabsContent>
+          {allVars.length === 0 ? (
+            <div className="rounded-lg border border-dashed py-12 text-center">
+              <p className="text-sm text-muted-foreground">No variables yet.</p>
+            </div>
+          ) : (
+            <div className="rounded-lg border">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left px-4 py-2 text-xs text-muted-foreground uppercase">
+                      Key
+                    </th>
+                    <th className="text-left px-4 py-2 text-xs text-muted-foreground uppercase">
+                      Value
+                    </th>
+                    <th className="text-left px-4 py-2 text-xs text-muted-foreground uppercase">
+                      Environment
+                    </th>
+                    <th className="text-right px-4 py-2 text-xs text-muted-foreground uppercase">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                
+                <tbody>
+                  {allVars.map((v) => {
+                    const env = envs.find((e) => e.id === v.environmentId);
+                    return (
+                      <tr key={v.id} className="border-b last:border-0">
+                        <td className="px-4 py-2 font-mono text-xs">{v.key}</td>
+                        <td className="px-4 py-2 font-mono text-xs text-muted-foreground">
+                          ••••••••••
+                        </td>
+                        <td className="px-4 py-2">
+                          <span className="text-xs px-2 py-0.5  rounded-full bg-muted">
+                            {env?.name || "unknown"}
+                          </span>
+                        </td>
+                        <td className="px-4 py-2 text-right">
+                          <div className="flex items-center justify-end gap-1">
+                            <button className="p-1 text-muted-foreground hover:text-foreground">
+                              <Eye size={14} />
+                            </button>
+                            <button className="p-1 text-muted-foreground hover:text-foreground">
+                              <Copy size={14} />
+                            </button>
+                            <button className="p-1 text-muted-foreground hover:text-foreground">
+                              <Pencil size={14} />
+                            </button>
+                            <DeleteVariableButton
+                              projectId={project.id}
+                              variableId={v.id}
+                            />
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
         </TabsContent>
 
         {/* تب Members */}
         <TabsContent value="members">
-          <TabsContent value="members">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm font-medium">
-                Members ({members.length})
-              </h2>
-              <InviteMemberDialog
-                environments={envs.map((e) => ({ id: e.id, name: e.name }))}
-                projectId={project.id}
-              />
-            </div>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-medium">Members ({members.length})</h2>
+            <InviteMemberDialog
+              environments={envs.map((e) => ({ id: e.id, name: e.name }))}
+              projectId={project.id}
+            />
+          </div>
 
-            {members.length === 0 ? (
-              <div className="rounded-lg border border-dashed py-12 text-center">
-                <p className="text-sm text-muted-foreground">No members yet.</p>
-              </div>
-            ) : (
-              <div className="flex flex-col gap-2">
-                {members.map((member) => (
-                  <div
-                    key={member.id}
-                    className="flex items-center justify-between rounded-lg border px-4 py-3"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs font-medium">
-                        {member.inviteEmail?.charAt(0)?.toUpperCase() ||
-                          member.role?.charAt(0)?.toUpperCase() ||
-                          "?"}
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium">
-                          {member.inviteEmail || member.userId || "Unknown"}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {member.role} · {member.status}
-                        </p>
-                      </div>
+          {members.length === 0 ? (
+            <div className="rounded-lg border border-dashed py-12 text-center">
+              <p className="text-sm text-muted-foreground">No members yet.</p>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2">
+              {members.map((member) => (
+                <div
+                  key={member.id}
+                  className="flex items-center justify-between rounded-lg border px-4 py-3"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs font-medium">
+                      {member.inviteEmail?.charAt(0)?.toUpperCase() ||
+                        member.role?.charAt(0)?.toUpperCase() ||
+                        "?"}
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-muted-foreground">
-                        {member.environmentIds?.length || 0} envs
-                      </span>
-                      {member.role !== "owner" && (
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="text-red-500 text-xs"
-                        >
-                          Remove
-                        </Button>
-                      )}
+                    <div>
+                      <p className="text-sm font-medium">
+                        {member.inviteEmail || member.userId || "Unknown"}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {member.role} · {member.status}
+                      </p>
                     </div>
                   </div>
-                ))}
-              </div>
-            )}
-          </TabsContent>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground">
+                      {member.environmentIds?.length || 0} envs
+                    </span>
+                    {member.role !== "owner" && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="text-red-500 text-xs"
+                      >
+                        Remove
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </TabsContent>
 
         {/* تب API Keys */}
         <TabsContent value="api-keys">
-          <TabsContent value="api-keys">
-            <h2 className="text-sm font-medium mb-4">
-              API Keys ({keys.length})
-            </h2>
+          <h2 className="text-sm font-medium mb-4">API Keys ({keys.length})</h2>
 
-            {keys.length === 0 ? (
-              <div className="rounded-lg border border-dashed py-12 text-center">
-                <p className="text-sm text-muted-foreground">
-                  No API keys yet.
-                </p>
-              </div>
-            ) : (
-              <div className="flex flex-col gap-2">
-                {keys.map((key) => (
-                  <div
-                    key={key.id}
-                    className="flex items-center justify-between rounded-lg border px-4 py-3"
-                  >
-                    <div>
-                      <p className="text-xs font-mono text-muted-foreground">
-                        {key.keyPreview || key.keyHash.slice(0, 16) + "..."}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Created {key.createdAt?.toDateString()}
-                        {key.lastUsedAt &&
-                          ` · Last used ${key.lastUsedAt.toDateString()}`}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {key.revokedAt ? (
-                        <span className="text-xs text-red-500">Revoked</span>
-                      ) : (
-                        <span className="text-xs text-green-600">Active</span>
-                      )}
-                    </div>
+          {keys.length === 0 ? (
+            <div className="rounded-lg border border-dashed py-12 text-center">
+              <p className="text-sm text-muted-foreground">No API keys yet.</p>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2">
+              {keys.map((key) => (
+                <div
+                  key={key.id}
+                  className="flex items-center justify-between rounded-lg border px-4 py-3"
+                >
+                  <div>
+                    <p className="text-xs font-mono text-muted-foreground">
+                      {key.keyPreview || key.keyHash.slice(0, 16) + "..."}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Created {key.createdAt?.toDateString()}
+                      {key.lastUsedAt &&
+                        ` · Last used ${key.lastUsedAt.toDateString()}`}
+                    </p>
                   </div>
-                ))}
-              </div>
-            )}
-          </TabsContent>
+                  <div className="flex items-center gap-2">
+                    {key.revokedAt ? (
+                      <span className="text-xs text-red-500">Revoked</span>
+                    ) : (
+                      <span className="text-xs text-green-600">Active</span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </TabsContent>
       </Tabs>
     </div>
