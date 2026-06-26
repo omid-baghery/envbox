@@ -16,8 +16,10 @@ import {
 import { AddVariableDialog } from "./_components/add-variable-dialog";
 import { Button } from "@/shared/components/ui/button";
 import { InviteMemberDialog } from "./_components/invite-member-dialog";
-import { Copy, Eye, Pencil } from "lucide-react";
+import { Pencil } from "lucide-react";
 import { DeleteVariableButton } from "./_components/delete-variable-button";
+import { decrypt } from "@/shared/lib/encryption";
+import { CopyVariableButton } from "./_components/copy-variable-button";
 
 export default async function ProjectPage({
   params,
@@ -49,6 +51,11 @@ export default async function ProjectPage({
     .select()
     .from(variables)
     .where(eq(variables.projectId, project.id));
+
+  const varsWithDecrypted = allVars.map((v) => ({
+    ...v,
+    decryptedValue: decrypt(v.encryptedValue),
+  }));
 
   // اعضا
   const members = await db
@@ -113,16 +120,16 @@ export default async function ProjectPage({
                       Value
                     </th>
                     <th className="text-left px-4 py-2 text-xs text-muted-foreground uppercase">
-                      Environment
+                      Env
                     </th>
                     <th className="text-right px-4 py-2 text-xs text-muted-foreground uppercase">
                       Actions
                     </th>
                   </tr>
                 </thead>
-                
+
                 <tbody>
-                  {allVars.map((v) => {
+                  {varsWithDecrypted.map((v) => {
                     const env = envs.find((e) => e.id === v.environmentId);
                     return (
                       <tr key={v.id} className="border-b last:border-0">
@@ -131,18 +138,16 @@ export default async function ProjectPage({
                           ••••••••••
                         </td>
                         <td className="px-4 py-2">
-                          <span className="text-xs px-2 py-0.5  rounded-full bg-muted">
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-muted">
                             {env?.name || "unknown"}
                           </span>
                         </td>
                         <td className="px-4 py-2 text-right">
                           <div className="flex items-center justify-end gap-1">
-                            <button className="p-1 text-muted-foreground hover:text-foreground">
-                              <Eye size={14} />
-                            </button>
-                            <button className="p-1 text-muted-foreground hover:text-foreground">
-                              <Copy size={14} />
-                            </button>
+                            <CopyVariableButton
+                              variableKey={v.key}
+                              value={v.decryptedValue}
+                            />
                             <button className="p-1 text-muted-foreground hover:text-foreground">
                               <Pencil size={14} />
                             </button>
