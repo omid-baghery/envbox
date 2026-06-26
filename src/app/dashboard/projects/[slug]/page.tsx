@@ -14,12 +14,12 @@ import {
   TabsTrigger,
 } from "@/shared/components/ui/tabs";
 import { AddVariableDialog } from "./_components/add-variable-dialog";
-import { Button } from "@/shared/components/ui/button";
 import { InviteMemberDialog } from "./_components/invite-member-dialog";
 import { DeleteVariableButton } from "./_components/delete-variable-button";
 import { decrypt } from "@/shared/lib/encryption";
 import { CopyVariableButton } from "./_components/copy-variable-button";
 import { EditVariableDialog } from "./_components/edit-variable-dialog";
+import { RemoveMemberButton } from "./_components/remove-member-button";
 
 export default async function ProjectPage({
   params,
@@ -190,42 +190,70 @@ export default async function ProjectPage({
             </div>
           ) : (
             <div className="flex flex-col gap-2">
-              {members.map((member) => (
-                <div
-                  key={member.id}
-                  className="flex items-center justify-between rounded-lg border px-4 py-3"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs font-medium">
-                      {member.inviteEmail?.charAt(0)?.toUpperCase() ||
-                        member.role?.charAt(0)?.toUpperCase() ||
-                        "?"}
+              {members.map((member) => {
+                const isRemoved = member.status === "removed";
+
+                return (
+                  <div
+                    key={member.id}
+                    className={`flex items-center justify-between rounded-lg border px-4 py-3 ${
+                      isRemoved ? "opacity-60" : ""
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs font-medium">
+                        {member.inviteEmail?.charAt(0)?.toUpperCase() ||
+                          member.role?.charAt(0)?.toUpperCase() ||
+                          "?"}
+                      </div>
+                      <div>
+                        <p
+                          className={`text-sm font-medium ${
+                            isRemoved
+                              ? "line-through text-muted-foreground"
+                              : ""
+                          }`}
+                        >
+                          {member.inviteEmail || member.userId || "Unknown"}
+                        </p>
+                        <div className="flex items-center gap-2 text-xs">
+                          <span className="text-muted-foreground">
+                            {member.role}
+                          </span>
+                          <span>·</span>
+                          {member.status === "active" && (
+                            <span className="text-green-700 font-normal">
+                              Active
+                            </span>
+                          )}
+                          {member.status === "pending" && (
+                            <span className="text-yellow-700 font-normal">
+                              Pending
+                            </span>
+                          )}
+                          {member.status === "removed" && (
+                            <span className="text-red-700 font-normal">
+                              Removed
+                            </span>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm font-medium">
-                        {member.inviteEmail || member.userId || "Unknown"}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {member.role} · {member.status}
-                      </p>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground">
+                        {member.environmentIds?.length || 0} envs
+                      </span>
+                      {member.role !== "owner" &&
+                        member.status !== "removed" && (
+                          <RemoveMemberButton
+                            projectId={project.id}
+                            memberId={member.id}
+                          />
+                        )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-muted-foreground">
-                      {member.environmentIds?.length || 0} envs
-                    </span>
-                    {member.role !== "owner" && (
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="text-red-500 text-xs"
-                      >
-                        Remove
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </TabsContent>
